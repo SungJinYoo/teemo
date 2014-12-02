@@ -1,4 +1,4 @@
-group_calendar
+teemo(group_calendar)
 ==============
 
 web project group calendar
