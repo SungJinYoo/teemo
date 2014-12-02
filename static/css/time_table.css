@@ -1,0 +1,13 @@
+#week_input{
+    width: 40px;
+}
+
+#time_table > caption{
+    text-align: center;
+}
+#time_table .period_header{
+    width: 100px;
+}
+#time_table td, #time_table th{
+    text-align: center;
+}

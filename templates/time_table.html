@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+{% load ds_utils %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/time_table.css' %}"/>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript" src="{% static 'js/time_table.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="container">
+            <div class="col-md-3">
+                <form id="fetch_time_table_form" role="form" method="post" action="{% url 'time_table:fetch' %}">
+                    {% csrf_token %}
+                    <fieldset>
+                        <legend>시간표 옵션 선택</legend>
+                        <div class="form-group">
+                            <p><strong><span id="year"></span><span>년</span></strong></p>
+                            <input id="year_input" type="hidden" />
+                        </div>
+                        <div class="form-group">
+                            <select id="semester" name="semester">
+                                {% for semester in SEMESTER %}
+                                    <option value="{{ semester }}">{{ SEMESTER_VERBOSE|nth:forloop.counter0 }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" id="week_input" name="week" placeholder="주차" />
+                            <label for="week_input">주차</label>
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>학년 선택</legend>
+                        {% for grade in GRADE_VERBOSE %}
+                            <input type="checkbox" id="{{ grade }}" value="{{ forloop.counter }}" />
+                            <label for="{{ grade }}">{{ GRADE_VERBOSE_KOR|nth:forloop.counter0 }}</label>
+                        {% endfor %}
+                    </fieldset>
+                </form>
+                <form id="fetch_attendance_data_form" role="form" method="post" action="{% url 'time_table:attendance' %}">
+                    {% csrf_token %}
+                    <input id="year_input" type="hidden" name="year" />
+                    <input id="semester_input" type="hidden" name="semester" />
+                    <input id="week_input" type="hidden" name="week" />
+                    <input id="block_no" type="hidden" name="block_no" />
+                    <input id="blocks" type="hidden" name="blocks" />
+                </form>
+            <fieldset>
+                <legend>편의기능</legend>
+                <button id="reset_button" class="btn btn-default">블럭 초기화</button>
+            </fieldset>
+            </div>
+            <div class="col-md-9">
+                <table id="time_table" class="table table-bordered table-condensed">
+                    <caption>시간표</caption>
+                    <colgroup>
+                        <col class="period_header">
+                    </colgroup>
+                    <tr>
+                        <th></th> {# for left-top empty th #}
+                        {% for day in WEEK_DAYS_KOR %}
+                            <th>{{ day }}</th>
+                        {% endfor %}
+                    </tr>
+                    {% for period in TIME_TABLE_PERIODS %}
+                        {% with forloop.counter0 as row %}
+                            {% with forloop.counter as period_number %}
+                                <tr>
+                                    <th>{{ period }}</th>
+                                    {% for day in WEEK_DAYS %}
+                                        {% with forloop.counter0 as col %}
+                                            <td id="{{ day }}_{{ period_number }}" data-row="{{ row }}" data-col="{{ col }}"></td>
+                                        {% endwith %}
+                                    {% endfor %}
+                                </tr>
+                            {% endwith %}
+                        {% endwith %}
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+    {#<!-- On rows -->#}
+    {#<tr class="active">...</tr>#}
+    {#<tr class="success">...</tr>#}
+    {#<tr class="warning">...</tr>#}
+    {#<tr class="danger">...</tr>#}
+    {#<tr class="info">...</tr>#}
+    {##}
+    {#<!-- On cells (`td` or `th`) -->#}
+    {#<tr>#}
+    {#    <td class="active">...</td>#}
+    {#    <td class="success">...</td>#}
+    {#    <td class="warning">...</td>#}
+    {#    <td class="danger">...</td>#}
+    {#    <td class="info">...</td>#}
+    {#</tr>#}
+{% endblock %}
