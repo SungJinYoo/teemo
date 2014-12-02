@@ -111,7 +111,7 @@ function time_table(){
                 else{
                     $(this).removeClass("selected");
                     selected_block_no = $(this).attr("data-block-no");
-                    $(this).removeAttr("data-block-no");
+                    $(this).removeAttr("data-block-no").css("background-color", "");
                 }
 
                 return false; // prevent text selection
@@ -122,7 +122,7 @@ function time_table(){
                         $(this).addClass("selected").attr("data-block-no", block_no).css("background-color", random_color_code);
                     }
                     else{
-                        $(this).removeClass("selected").removeAttr("data-block-no");
+                        $(this).removeClass("selected").removeAttr("data-block-no").css("background-color", "");
                     }
                 }
             })
@@ -162,7 +162,7 @@ function time_table(){
         $("#reset_button").click(function(){
             var blocks = $("#time_table").find("td.selected");
             blocks.each(function(index, block){
-                $(block).removeAttr("data-block-no").removeClass("selected");
+                $(block).removeAttr("data-block-no").removeClass("selected").css("background-color", "");
             });
         })
     }
