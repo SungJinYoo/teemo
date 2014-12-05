@@ -42,6 +42,7 @@ INSTALLED_APPS = (
 
 LOCAL_APPS = (
     'core',
+    'teemo',
     'time_table',
 )
 
@@ -107,6 +108,9 @@ USE_TZ = True
 LOGIN_URL = '/login/'
 LOGOUT_URL = '/logout/'
 
+EZHUB_LOGIN_ID = '2008037280'
+EZHUB_LOGIN_PW = 'gmrrh9915!'
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
@@ -120,3 +124,9 @@ STATICFILES_DIRS = (
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR,  'templates'),
 )
+
+
+# serializer settings
+SERIALIZATION_MODULES = {
+    'json': 'core.serializers.json_serializer'
+}

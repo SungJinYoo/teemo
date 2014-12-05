@@ -21,7 +21,7 @@
                         <legend>시간표 옵션 선택</legend>
                         <div class="form-group">
                             <p><strong><span id="year"></span><span>년</span></strong></p>
-                            <input id="year_input" type="hidden" />
+                            <input id="year_input" type="hidden" name="year" />
                         </div>
                         <div class="form-group">
                             <select id="semester" name="semester">
@@ -34,13 +34,16 @@
                             <input type="number" id="week_input" name="week" placeholder="주차" />
                             <label for="week_input">주차</label>
                         </div>
+                        <input type="hidden" id="grade_input" name="grade" />
                     </fieldset>
                     <fieldset>
                         <legend>학년 선택</legend>
                         {% for grade in GRADE_VERBOSE %}
-                            <input type="checkbox" id="{{ grade }}" value="{{ forloop.counter }}" />
+                            <input type="checkbox" id="{{ grade }}" class="grade_checkbox" value="{{ forloop.counter }}" />
                             <label for="{{ grade }}">{{ GRADE_VERBOSE_KOR|nth:forloop.counter0 }}</label>
                         {% endfor %}
+                        <input type="checkbox" id="all" value="all" />
+                        <label for="all">전체</label>
                     </fieldset>
                 </form>
                 <form id="fetch_attendance_data_form" role="form" method="post" action="{% url 'time_table:attendance' %}">
@@ -60,7 +63,8 @@
                 <table id="time_table" class="table table-bordered table-condensed">
                     <caption>시간표</caption>
                     <colgroup>
-                        <col class="period_header">
+                        <col span="1" class="period_header">
+                        <col span="7" class="time_table_cell">
                     </colgroup>
                     <tr>
                         <th></th> {# for left-top empty th #}
@@ -70,10 +74,10 @@
                     </tr>
                     {% for period in TIME_TABLE_PERIODS %}
                         {% with forloop.counter0 as row %}
-                            {% with forloop.counter as period_number %}
+                            {% with forloop.counter0 as period_number %}
                                 <tr>
                                     <th>{{ period }}</th>
-                                    {% for day in WEEK_DAYS %}
+                                    {% for day in WEEK_DAY_KEYS %}
                                         {% with forloop.counter0 as col %}
                                             <td id="{{ day }}_{{ period_number }}" data-row="{{ row }}" data-col="{{ col }}"></td>
                                         {% endwith %}

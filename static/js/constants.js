@@ -4,10 +4,13 @@
 
 var FIRST_SEMESTER = 10;
 var SECOND_SEMESTER = 20;
+var SUMMER_SEMESTER = 30;
+var WINTER_SEMESTER = 40;
 
-var SEMESTER = [
-    FIRST_SEMESTER, // 1학기
-    SECOND_SEMESTER, // 2학기
-//    30, // 여름
-//    40  // 겨울
+
+var SEMESTERS = [
+    FIRST_SEMESTER,
+    SECOND_SEMESTER,
+    SUMMER_SEMESTER,
+    WINTER_SEMESTER
 ]

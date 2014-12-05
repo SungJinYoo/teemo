@@ -6,8 +6,12 @@
     text-align: center;
 }
 #time_table .period_header{
-    width: 100px;
+    width: 12%;
+}
+#time_table .time_table_cell{
+    width: 11%;
 }
 #time_table td, #time_table th{
     text-align: center;
 }
+

@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
+import json
 from django.contrib.auth import logout, login, authenticate
 from django.core.urlresolvers import reverse
+from django.http.response import HttpResponse
 from django.shortcuts import redirect
 from django.views.generic import View, TemplateView
-from teemo.forms import LoginForm
+from core.views import LoginRequiredMixin
+from teemo.forms import LoginForm, AddStudentForm
+from time_table.models import add_student
 
 
 class LoginView(TemplateView):
@@ -43,3 +47,26 @@ class LogoutView(View):
         logout(request)
 
         return redirect(reverse('index'))
+
+
+class AddStudentView(LoginRequiredMixin, TemplateView):
+    template_name = 'add_student.html'
+
+    # generates an json response
+    def post(self, request, *args, **kwargs):
+        form = AddStudentForm(request.POST)
+
+        if form.is_valid():
+            result, toast_type, message = add_student(form.cleaned_data['student_id'])
+        else:
+            result = False
+            toast_type = u'danger'
+            message = u'올바른 학번을 입력해주세요'
+
+        response_data = dict(
+            result=result,
+            toast_type=toast_type,
+            message=message
+        )
+
+        return HttpResponse(json.dumps(response_data), content_type='application/json')

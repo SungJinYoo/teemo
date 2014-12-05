@@ -34,11 +34,11 @@ function time_table(){
         var current_month = new Date().getMonth();
         var semester = FIRST_SEMESTER; // default to 1학기
         if(0 <= current_month && current_month < 2) // 겨울학기 (1~2월)
-            semester = 4;
+            semester = 40;
         else if(2 <= current_month && current_month < 6) // 1학기 (3~6월)
             semester = FIRST_SEMESTER;
         else if(6 <= current_month && current_month < 8) // 여름학기 (7~8월)
-            semester = 3;
+            semester = 30;
         else if(8 <= current_month && current_month < 12)
             semester = SECOND_SEMESTER;
 
@@ -165,6 +165,44 @@ function time_table(){
                 $(block).removeAttr("data-block-no").removeClass("selected").css("background-color", "");
             });
         })
+
+        $("input.grade_checkbox").change(function(){
+            if($(this).is(":checked")){
+                var form = $("#fetch_time_table_form");
+                form.find("#grade_input").val($(this).val());
+
+                $.post(
+                    form.attr('action'),
+                    form.serialize()
+                )
+                    .done(function(json) {
+                        toast_message(json.type, json.message);
+                        if(json.result){
+                            var time_table_data = json.data;
+                            for(var i = 0; i < time_table_data.length; i++){
+                                var course_data = time_table_data[i];
+                                var course_no = course_data.fields.course_no;
+                                var course_name = course_data.fields.name;
+                                var course_time_data = course_data.fields.course_times;
+                                var color_code = get_random_color_code();
+
+                                for(var j = 0; j < course_time_data.length; j++){
+                                    var course_time = course_time_data[j];
+                                    var block = $("#{0}_{1}".format(course_time.fields.day, course_time.fields.period_index));
+                                    var upper_block = $("#{0}_{1}".format(course_time.fields.day, parseInt(course_time.fields.period_index) - 1));
+
+                                    console.log(block);
+                                    if(j == 0 || upper_block.css("background-color") == "rgba(0, 0, 0, 0)"){
+                                        block.text("{0}, {1}".format(course_no, course_name));
+                                    }
+                                    block.css("background-color", color_code);
+                                }
+                            }
+                        }
+                    });
+
+            }
+        });
     }
 
     initialize();
