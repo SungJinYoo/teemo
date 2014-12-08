@@ -4,6 +4,7 @@
 
 #time_table > caption{
     text-align: center;
+    font-size: 20px;
 }
 #time_table .period_header{
     width: 12%;
@@ -16,7 +17,7 @@
 }
 .arrows{
 	height: 800px;
-	font-size: 60pt;
+	font-size: 40pt;
 }
 
 .arrows p{
