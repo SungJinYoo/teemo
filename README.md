@@ -28,6 +28,7 @@ install mysql
 	or
 	brew install mysql
 
+Additional package Install
 
 	pip install -r requirements.txt
 
