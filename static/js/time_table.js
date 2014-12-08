@@ -17,33 +17,48 @@ function time_table(){
     }
 
     function initialize_current_year(){
-        var year_span = $("span#year");
-        var fetch_form_year_input = $("#fetch_time_table_form").find("#year_input");
-        var attendance_form_year_input = $("#fetch_attendance_data_form").find("#year_input");
-
+        var year_id = $("#year");
+        var year_class = $(".year");
         var current_year = new Date().getFullYear();
 
-        year_span.text(current_year);
-        fetch_form_year_input.val(current_year);
-        attendance_form_year_input.val(current_year);
+        year_id.text(current_year);
+        year_class.each(function(index, element){
+            $(element).val(current_year);
+        });
     }
 
     function initialize_current_semester(){
-        var fetch_form_semester_input = $("#semester");
-        var attendance_form_semester_input = $("#semester_input");
+        
+        var semester_id = $("#semester");
+        var semester_class = $(".semester");
         var current_month = new Date().getMonth();
+
         var semester = FIRST_SEMESTER; // default to 1학기
         if(0 <= current_month && current_month < 2) // 겨울학기 (1~2월)
-            semester = 40;
+            semester = WINTER_SEMESTER;
         else if(2 <= current_month && current_month < 6) // 1학기 (3~6월)
             semester = FIRST_SEMESTER;
         else if(6 <= current_month && current_month < 8) // 여름학기 (7~8월)
-            semester = 30;
+            semester = SUMMER_SEMESTER;
         else if(8 <= current_month && current_month < 12)
             semester = SECOND_SEMESTER;
 
-        fetch_form_semester_input.val(semester);
-        attendance_form_semester_input.val(semester);
+        if(semester===WINTER_SEMESTER){
+            semester_id.text("겨울 계절");
+        }
+        else if(semester===FIRST_SEMESTER){
+            semester_id.text("1");
+        }
+        else if(semester===SUMMER_SEMESTER){
+            semester_id.text("여름 계절");
+        }
+        else if(semester===SECOND_SEMESTER){
+            semester_id.text("2");
+        }
+        
+        semester_class.each(function(index, element){
+            $(element).val(semester);
+        })
         current_semester = semester;
     }
 
@@ -69,9 +84,11 @@ function time_table(){
         if(start_date.getDay() == 0) start_date.setDate(start_date.getDate() + 1); // sunday + 1 == monday
 
         week = find_current_week(today, start_date);
-
-        $("#fetch_time_table_form").find("#week_input").val(week).attr("data-value", week);
-        $("#fetch_attendance_data_form").find("#week_input").val(week).attr("data-value", week);
+        $("#week").text(week).attr("data-value", week);
+        var week_class = $(".week");
+        week_class.each(function(index, element){
+            $(element).val(week).attr("data-value", week);
+        })
     }
 
     function initialize_event_handlers(){
@@ -165,44 +182,6 @@ function time_table(){
                 $(block).removeAttr("data-block-no").removeClass("selected").css("background-color", "");
             });
         })
-
-        $("input.grade_checkbox").change(function(){
-            if($(this).is(":checked")){
-                var form = $("#fetch_time_table_form");
-                form.find("#grade_input").val($(this).val());
-
-                $.post(
-                    form.attr('action'),
-                    form.serialize()
-                )
-                    .done(function(json) {
-                        toast_message(json.type, json.message);
-                        if(json.result){
-                            var time_table_data = json.data;
-                            for(var i = 0; i < time_table_data.length; i++){
-                                var course_data = time_table_data[i];
-                                var course_no = course_data.fields.course_no;
-                                var course_name = course_data.fields.name;
-                                var course_time_data = course_data.fields.course_times;
-                                var color_code = get_random_color_code();
-
-                                for(var j = 0; j < course_time_data.length; j++){
-                                    var course_time = course_time_data[j];
-                                    var block = $("#{0}_{1}".format(course_time.fields.day, course_time.fields.period_index));
-                                    var upper_block = $("#{0}_{1}".format(course_time.fields.day, parseInt(course_time.fields.period_index) - 1));
-
-                                    console.log(block);
-                                    if(j == 0 || upper_block.css("background-color") == "rgba(0, 0, 0, 0)"){
-                                        block.text("{0}, {1}".format(course_no, course_name));
-                                    }
-                                    block.css("background-color", color_code);
-                                }
-                            }
-                        }
-                    });
-
-            }
-        });
     }
 
     initialize();
