@@ -12,29 +12,30 @@
 {% endblock %}
 
 {% block content %}
+	<form id="fetch_time_table_form" role="form" method="post" action="{% url 'time_table:fetch' %}">
+		{% csrf_token %}
+		<fieldset>
+			<div class="form-group">
+				<input class="year" type="hidden" name="year" />
+				<input class="semester" type="hidden" name="semester" />
+				<input class="week" type="hidden" name="week"/>
+			</div>
+		</fieldset>
+	</form>
+	<form id="fetch_attendance_data_form" role="form" method="post" action="{% url 'time_table:attendance' %}">
+		{% csrf_token %}
+		<input class="year" type="hidden" name="year" />
+		<input class="semester" type="hidden" name="semester" />
+		<input class="week" type="hidden" name="week" />
+		<input id="block_no" type="hidden" name="block_no" />
+		<input id="blocks" type="hidden" name="blocks" />
+	</form>
 	<div class="row">
 		<div class="container">
-			<div class="col-md-10 col-md-offset-1">
-				<form id="fetch_time_table_form" role="form" method="post" action="{% url 'time_table:fetch' %}">
-					{% csrf_token %}
-					<fieldset>
-						<div class="form-group">
-							<input class="year" type="hidden" name="year" />
-							<input class="semester" type="hidden" name="semester" />
-							<input class="week" type="hidden" name="week"/>
-						</div>
-					</fieldset>
-				</form>
-				<form id="fetch_attendance_data_form" role="form" method="post" action="{% url 'time_table:attendance' %}">
-					{% csrf_token %}
-					<input class="year" type="hidden" name="year" />
-					<input class="semester" type="hidden" name="semester" />
-					<input class="week" type="hidden" name="week" />
-					<input id="block_no" type="hidden" name="block_no" />
-					<input id="blocks" type="hidden" name="blocks" />
-				</form>
+			<div class="col-md-1">
+				<p id="prev_week">LEFT</p>
 			</div>
-			<div class="col-md-10 col-md-offset-1">
+			<div class="col-md-10">
 				<table id="time_table" class="table table-bordered table-condensed">
 					<caption><p><span id="year"></span><span>년</span> <span id="semester"></span><span>학기</span> <span id = "week"></span><span>주차</span></p></caption>
 					<colgroup>
@@ -62,6 +63,9 @@
 						{% endwith %}
 					{% endfor %}
 				</table>
+			</div>
+			<div class="col-md-1">
+			<p id="next_week">RIGHT</p>
 			</div>
 		</div>
 	</div>

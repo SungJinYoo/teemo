@@ -182,6 +182,33 @@ function time_table(){
                 $(block).removeAttr("data-block-no").removeClass("selected").css("background-color", "");
             });
         })
+
+        // CONTROLLER
+        $("#prev_week").click(function(){
+            var week_id = $("#week");
+            var week_class = $(".week");
+            var current_week = parseInt(week_class.val())-1;
+            if( !(1<=current_week && current_week <=16) ){
+                return  toast_message("error","invalid week");
+            }
+            $("#week").text(current_week);
+            week_class.each(function(index, element){
+                $(element).val(current_week);
+            })
+        });
+
+        $("#next_week").click(function(){
+            var week_id = $("#week");
+            var week_class = $(".week");
+            var current_week = parseInt(week_class.val())+1;
+            if( !(1<=current_week && current_week <=16)){
+                return  toast_message("error","invalid week");
+            }
+            $("#week").text(current_week);
+            week_class.each(function(index, element){
+                $(element).val(current_week);
+            })
+        });
     }
 
     initialize();
