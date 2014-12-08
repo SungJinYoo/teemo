@@ -32,14 +32,15 @@ install mysql
 	pip install -r requirements.txt
 
 ADD mysql database,connect your mysql
-	
+
 	create databases teemo default character set "UTF8";
 
-python manage.py runserver
+Run server
+	python manage.py runserver
 
 IF you have to get permission to manage database
 	
-	pythohn mamage.py createsuperuser
+	python mamage.py createsuperuser
 
 Add initial_data into your application
 	
