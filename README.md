@@ -25,7 +25,7 @@ Make virtualenv
 install mysql
 
 	sudo apt-get install mysqlclient-dev
-	or
+	
 	brew install mysql
 
 Additional package Install
