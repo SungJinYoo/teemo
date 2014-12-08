@@ -88,7 +88,7 @@ function time_table(){
         var week_class = $(".week");
         week_class.each(function(index, element){
             $(element).val(week).attr("data-value", week);
-        })
+        });
     }
 
     function initialize_event_handlers(){
@@ -211,5 +211,16 @@ function time_table(){
         });
     }
 
+    $(".arrows").each(function(index, element){
+        $(element).affix({
+            offset: {
+                top: 0,
+                // left: 300,
+                bottom: function () {
+                  return (this.bottom = $('.footer').outerHeight(true))
+                }
+            }
+        })
+    })
     initialize();
 }

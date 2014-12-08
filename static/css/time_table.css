@@ -14,4 +14,11 @@
 #time_table td, #time_table th{
     text-align: center;
 }
+.arrows{
+	height: 800px;
+	font-size: 50pt;
+}
 
+.arrows p{
+	margin-top:300px;
+}

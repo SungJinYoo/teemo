@@ -33,9 +33,11 @@
 	<div class="row">
 		<div class="container">
 			<div class="col-md-1">
-				<p id="prev_week"><span class="glyphicon glyphicon-chevron-left"></p>
+				<div class="arrows" id="prev_week">
+					<p><span class="glyphicon glyphicon-chevron-left"></span></p>
+				</div>
 			</div>
-			<div class="col-md-10">
+			<div class="col-md-10" id="time_table_wrapper">
 				<table id="time_table" class="table table-bordered table-condensed">
 					<caption><p><span id="year"></span><span>년</span> <span id="semester"></span><span>학기</span> <span id = "week"></span><span>주차</span></p></caption>
 					<colgroup>
@@ -65,7 +67,9 @@
 				</table>
 			</div>
 			<div class="col-md-1">
-			<p id="next_week"><span class="glyphicon glyphicon-chevron-right"></span></p>
+				<div class="arrows" id="next_week">
+					<p><span class="glyphicon glyphicon-chevron-right"></span></p>
+				</div>
 			</div>
 		</div>
 	</div>
