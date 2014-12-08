@@ -36,6 +36,7 @@ ADD mysql database,connect your mysql
 	create databases teemo default character set "UTF8";
 
 Run server
+
 	python manage.py runserver
 
 IF you have to get permission to manage database
