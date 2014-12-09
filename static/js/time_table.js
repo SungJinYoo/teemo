@@ -309,33 +309,32 @@ function time_table(){
                 $(element).val(current_week);
             });
         });
-    });
 
-    // About arrows
-    $(".arrows").each(function(index, element){
-        $(element).affix({
-            offset: {
-                top: 0
-            }
-        });
+        // About arrows
+        $(".arrows").each(function(index, element){
+            $(element).affix({
+                offset: {
+                    top: 0
+                }
+            });
 
-        $(element).hover(function() {
-            /* Stuff to do when the mouse enters the element */
-            $(this).find("span").css("color","#969090");
-        }, function() {
-            /* Stuff to do when the mouse leaves the element */
-            $(this).find("span").css("color","#333333");
+            $(element).hover(function() {
+                /* Stuff to do when the mouse enters the element */
+                $(this).find("span").css("color","#969090");
+            }, function() {
+                /* Stuff to do when the mouse leaves the element */
+                $(this).find("span").css("color","#333333");
+            });
+            $(element).mousedown(function(event) {
+                /* Act on the event */
+                $(this).find("span").css("color","#CA5E58");
+            });
+            $(element).mouseup(function(event) {
+                /* Act on the event */
+                $(this).find("span").css("color","#333333");
+            });
         });
-        $(element).mousedown(function(event) {
-            /* Act on the event */
-            $(this).find("span").css("color","#CA5E58");
-        });
-        $(element).mouseup(function(event) {
-            /* Act on the event */
-            $(this).find("span").css("color","#333333");
-        });
-    });
-}
+    }
 
-initialize();
+    initialize();
 }
