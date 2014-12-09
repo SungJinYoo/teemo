@@ -1,13 +1,32 @@
 # -*- coding: utf-8 -*-
 import json
 from django.contrib.auth import logout, login, authenticate
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponse
 from django.shortcuts import redirect
 from django.views.generic import View, TemplateView
+from django.views.generic.edit import FormView
 from core.views import LoginRequiredMixin
-from teemo.forms import LoginForm, AddStudentForm
+from teemo.forms import LoginForm, AddStudentForm, SignUpForm
 from time_table.models import add_student
+
+
+class SignUpView(TemplateView):
+    template_name = 'signup.html'
+
+    def post(self, request, *args, **kwargs):
+        form = SignUpForm(request.POST)
+
+        if form.is_valid():
+            user = User.objects.create_user(**form.cleaned_data)
+            if user:
+                login(request, user)
+                return redirect(reverse('index'))
+            else:
+                print 'user cannot be created'
+        else:
+            print 'invalid form data'
 
 
 class LoginView(TemplateView):

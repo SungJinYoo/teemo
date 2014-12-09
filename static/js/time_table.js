@@ -135,9 +135,9 @@ function time_table(){
                 console.log("ok");
             }));
             attendance_info.append($("<button>").addClass("glyphicon glyphicon-remove glyphicon-button menu_button remove_button").click(function(){
-                console.log("remove");
+                $(this).parent().remove();
             }));
-            attendance_info.append($("<div>").addClass("clear-both"))
+            attendance_info.append($("<div>").addClass("clear-both"));
             attendance_info.append($("<pre>").append($("<p>").text("총 수강인원: {0}\n예상 참석인원: {1}\n참석예상률: {2}%".format(total, attend, attendance_rate * 100))));
 
             $("#attendance_info_wrapper").append(attendance_info);
