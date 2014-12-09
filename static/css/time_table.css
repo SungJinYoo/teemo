@@ -22,7 +22,6 @@
 	height: 800px;
 	font-size: 40pt;
 }
-
 .arrows p{
 	margin-top:300px;
 }
@@ -45,7 +44,7 @@
     border-color: #af2120;
     color: #af2120;
 }
-.attendance_info pre{
+.attendance_info pre {
     margin: 0px;
     border: 0px;
     padding: 0px;

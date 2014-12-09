@@ -30,12 +30,12 @@ function time_table(){
     }
 
     function initialize_current_semester(){
-
         var semester_id = $("#semester");
         var semester_class = $(".semester");
         var current_month = new Date().getMonth();
 
         var semester = FIRST_SEMESTER; // default to 1학기
+
         if(0 <= current_month && current_month < 2) { // 겨울학기 (1~2월)
             semester = WINTER_SEMESTER;
         }
@@ -65,6 +65,7 @@ function time_table(){
         semester_class.each(function(index, element){
             $(element).val(semester);
         });
+
         current_semester = semester;
     }
 
@@ -282,15 +283,16 @@ function time_table(){
         });
 
         // CONTROLLER
-        $("#prev_week").click(function(){
+        $("#prev_week").click(function() {
             var week_id = $("#week");
             var week_class = $(".week");
-            var current_week = parseInt(week_class.val())-1;
-            if( !(1<=current_week && current_week <=16) ){
-                return  toast_message("error","이전주는 없습니다");
+            var current_week = parseInt(week_class.val()) - 1;
+            if (!(1 <= current_week && current_week <= 16)) {
+                return  toast_message("error", "이전주는 없습니다");
             }
+
             $("#week").text(current_week);
-            week_class.each(function(index, element){
+            week_class.each(function (index, element) {
                 $(element).val(current_week);
             });
         });
@@ -298,7 +300,7 @@ function time_table(){
         $("#next_week").click(function(){
             var week_id = $("#week");
             var week_class = $(".week");
-            var current_week = parseInt(week_class.val())+1;
+            var current_week = parseInt(week_class.val()) + 1;
             if( !(1<=current_week && current_week <=16)){
                 return  toast_message("error","다음주는 없습니다");
             }
@@ -307,14 +309,16 @@ function time_table(){
                 $(element).val(current_week);
             });
         });
-    }
-// About arrows
+    });
+
+    // About arrows
     $(".arrows").each(function(index, element){
         $(element).affix({
             offset: {
                 top: 0
             }
         });
+
         $(element).hover(function() {
             /* Stuff to do when the mouse enters the element */
             $(this).find("span").css("color","#969090");
@@ -331,5 +335,7 @@ function time_table(){
             $(this).find("span").css("color","#333333");
         });
     });
-    initialize();
+}
+
+initialize();
 }
