@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils.decorators import method_decorator
@@ -37,10 +38,23 @@ class CourseManager(models.Manager):
 
 
 class CourseTime(models.Model):
-    day = models.CharField(verbose_name=u'요일', max_length=8, null=False, blank=False)
+    WEEK_DAY_CHOICES = (
+        (WEEK_DAY_KEYS[0], u'월요일'),
+        (WEEK_DAY_KEYS[1], u'화요일'),
+        (WEEK_DAY_KEYS[2], u'수요일'),
+        (WEEK_DAY_KEYS[3], u'목요일'),
+        (WEEK_DAY_KEYS[4], u'금요일'),
+        (WEEK_DAY_KEYS[5], u'토요일'),
+        (WEEK_DAY_KEYS[6], u'월요일')
+    )
+
+    day = models.CharField(verbose_name=u'요일', choices=WEEK_DAY_CHOICES, max_length=8, null=False, blank=False)
     period_index = models.IntegerField(verbose_name=u'교시', null=False, blank=False)
     start_time = models.CharField(verbose_name=u'시작시간', max_length=8, null=False, blank=False)
     end_time = models.CharField(verbose_name=u'종료시간', max_length=8, null=False, blank=False)
+
+    def __unicode__(self):
+        return u'{} {}~{}'.format(self.day, self.start_time, self.end_time)
 
 
 class Course(models.Model):
@@ -54,10 +68,37 @@ class Course(models.Model):
 
     objects = CourseManager()
 
+    def __unicode__(self):
+        return u'{}-{}'.format(self.course_no, self.name)
+
+
+class Extra(models.Model):
+    ADDITIONAL = 1
+    EXAM = 2
+
+    EXTRA_TYPE_CHOICES = (
+        (ADDITIONAL, u'보강'),
+        (EXAM, u'시험'),
+    )
+
+    course = models.ForeignKey(Course, related_name='extras')
+    course_times = models.ManyToManyField(CourseTime, related_name='extra')
+
+    week = models.IntegerField(verbose_name=u'주차', null=False, blank=False)
+    type = models.IntegerField(verbose_name=u'타입', null=False, blank=False, choices=EXTRA_TYPE_CHOICES)
+
+    def __unicode__(self):
+        return u'{} {} {}'.format(self.week, self.type, self.course.name)
+
 
 class Student(models.Model):
+    user = models.OneToOneField(User, null=True, blank=True)
     student_id = models.SlugField(verbose_name=u'학번', null=False, blank=False)
     courses = models.ManyToManyField(Course, related_name='students')
+
+    def _add_course(self, week_course_dict):
+        course = Course.objects.create(**week_course_dict)
+        self.courses.add(course)
 
     def add_course(self):
         year = get_current_year()
@@ -72,7 +113,19 @@ class Student(models.Model):
                 if period_data[day]:
                     course_no, name, trash1, trash2, trash3 = period_data[day].split(',')
                     if week_course_dict[day]:
-                        week_course_dict[day]['end_time'] = end_time
+                        if week_course_dict[day]['name'] == name:
+                            week_course_dict[day]['end_time'] = end_time
+                        else:
+                            self._add_course(week_course_dict[day])
+                            week_course_dict[day] = dict(
+                                year=year,
+                                semester=semester,
+                                grade=0,
+                                course_no=course_no,
+                                name=name,
+                                start_time=start_time,
+                                day=day,
+                            )
                     else:
                         week_course_dict[day] = dict(
                             year=year,
@@ -85,9 +138,11 @@ class Student(models.Model):
                         )
                 else:
                     if week_course_dict[day]:
-                        course = Course.objects.create(**week_course_dict[day])
-                        self.courses.add(course)
+                        self._add_course(week_course_dict[day])
                         week_course_dict[day] = None
+
+    def __unicode__(self):
+        return u'{}'.format(self.student_id)
 
 
 def add_student(student_id):

@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import json
 from django.core import serializers
+from django.db.models.query_utils import Q
 from django.http.response import HttpResponse
 from django.views.generic.base import View
+from core.constants import WEEK_DAY_TRANS_KOR
 from core.views import LoginRequiredMixin
-from time_table.forms import TimeTableForm
-from time_table.models import Course
+from time_table.forms import TimeTableForm, AttendanceForm
+from time_table.models import Course, Student, CourseTime
 
 
 class TimeTableView(LoginRequiredMixin, View):
@@ -17,20 +19,9 @@ class TimeTableView(LoginRequiredMixin, View):
 
         form = TimeTableForm(request.POST)
         if form.is_valid():
-            form.cleaned_data['year']
-            form.cleaned_data['semester']
-            form.cleaned_data['grade']
-            form.cleaned_data['week']
-
-            # TODO: add filter for parameter week
-            # start_date, end_date = get_dates_of_week()
-            # TODO: add filter for grade
             data = json.loads(serializers.serialize(
                 'json',
-                Course.objects.filter(
-                    year=form.cleaned_data['year'],
-                    semester=form.cleaned_data['semester']
-                ),
+                Course.objects.filter(students__in=Student.objects.filter(courses__in=Course.objects.filter(course_no=form.cleaned_data['course_no']))),
                 relations=('course_times',)
             ))
             result = True
@@ -52,8 +43,41 @@ class TimeTableView(LoginRequiredMixin, View):
 
 class AttendanceView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
-        response_data = dict(
+        form = AttendanceForm(request.POST)
 
+        result = False
+        data = {}
+        type=u'error'
+        message = u'출석 예상 정보를 불러오는데 실패하였습니다'
+
+        if form.is_valid():
+            block_data = json.loads(form.cleaned_data['block_data'])
+
+            course = Course.objects.filter(course_no=form.cleaned_data['course_no']).get()
+            students = Student.objects.filter(courses=course)  # all the students that attends this course
+            course_times = CourseTime.objects.filter(day=block_data['day'], period_index__in=block_data['period_index_list'])
+            students_that_expected_to_dismiss = students.filter(courses__in=Course.objects.filter(course_times__in=course_times))
+
+            total_students = students.count()
+            dismiss_students = students_that_expected_to_dismiss.count()
+
+            result = True
+            data = dict(
+                total_students=total_students,
+                dismiss_students=dismiss_students,
+                attendance_rate=0 if total_students == 0 else float(dismiss_students) / total_students,
+            )
+            type = u'success'
+            message = u'출석 예상 정보를 가져왔습니다<br/>({} {}~{}교시)'.format(WEEK_DAY_TRANS_KOR[block_data['day']],
+                                                             int(block_data['period_index_list'][0]) + 1,
+                                                             int(block_data['period_index_list'][len(block_data['period_index_list']) - 1]) + 1)
+
+
+        response_data = dict(
+            result=result,
+            data=data,
+            type=type,
+            message=message
         )
 
         return HttpResponse(json.dumps(response_data), content_type='application/json')

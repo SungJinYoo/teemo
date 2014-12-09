@@ -79,15 +79,27 @@ function time_table(){
             var form = $("#fetch_attendance_data_form");
             form.find("#block_no").val(block_no);
 
-            var block_list = [];
+            var period_index_list = [];
             blocks.each(function(index, block){
-                block_list.push({row: $(block).attr("data-row"), col: $(block).attr("data-col")});
+                period_index_list.push($(block).attr("data-row"));
             });
 
-            form.find("#blocks").val(JSON.stringify({block_data: block_list}));
+            form.find("#block_data").val(JSON.stringify(
+                {
+                    day: $(blocks[0]).attr("data-day"),
+                    period_index_list: period_index_list
+                }
+            ));
             $.post(form.attr("action"),
                 form.serialize()
-            );
+            )
+                .done(function(json){
+                    toast_message(json.type, json.message);
+                    if(json.result){
+                        attendance_data = json.data;
+                        console.log(attendance_data);
+                    }
+                });
         }
 
         // event for time table cells
@@ -164,44 +176,53 @@ function time_table(){
             blocks.each(function(index, block){
                 $(block).removeAttr("data-block-no").removeClass("selected").css("background-color", "");
             });
-        })
+        });
 
-        $("input.grade_checkbox").change(function(){
-            if($(this).is(":checked")){
-                var form = $("#fetch_time_table_form");
-                form.find("#grade_input").val($(this).val());
+        $("#course_no").change(function(){
+            var form = $("#fetch_time_table_form");
 
-                $.post(
-                    form.attr('action'),
-                    form.serialize()
-                )
-                    .done(function(json) {
-                        toast_message(json.type, json.message);
-                        if(json.result){
-                            var time_table_data = json.data;
-                            for(var i = 0; i < time_table_data.length; i++){
-                                var course_data = time_table_data[i];
-                                var course_no = course_data.fields.course_no;
-                                var course_name = course_data.fields.name;
-                                var course_time_data = course_data.fields.course_times;
-                                var color_code = get_random_color_code();
+            var course_no_re = new RegExp("^\\d{5}$");
+            var course_no_input = form.find("#course_no");
 
-                                for(var j = 0; j < course_time_data.length; j++){
-                                    var course_time = course_time_data[j];
-                                    var block = $("#{0}_{1}".format(course_time.fields.day, course_time.fields.period_index));
-                                    var upper_block = $("#{0}_{1}".format(course_time.fields.day, parseInt(course_time.fields.period_index) - 1));
+            if(!course_no_re.test(course_no_input.val())){
+                toast_message("warning", "수업번호 형식에 맞지 않습니다");
+                return;
+            }
 
-                                    console.log(block);
-                                    if(j == 0 || upper_block.css("background-color") == "rgba(0, 0, 0, 0)"){
-                                        block.text("{0}, {1}".format(course_no, course_name));
-                                    }
-                                    block.css("background-color", color_code);
+            $(".course_no").each(function(index, element){
+                $(this).val(course_no_input.val());
+            });
+
+            $.post(
+                form.attr('action'),
+                form.serialize()
+            )
+                .done(function(json){
+                    toast_message(json.type, json.message);
+
+                    if(json.result){
+                        var time_table_data = json.data;
+                        for(var i = 0; i < time_table_data.length; i++){
+                            var course_data = time_table_data[i];
+                            var course_no = course_data.fields.course_no;
+                            var course_name = course_data.fields.name;
+                            var course_time_data = course_data.fields.course_times;
+                            var color_code = get_random_color_code();
+
+                            for(var j = 0; j < course_time_data.length; j++){
+                                var course_time = course_time_data[j];
+                                var block = $("#{0}_{1}".format(course_time.fields.day, course_time.fields.period_index));
+                                var upper_block = $("#{0}_{1}".format(course_time.fields.day, parseInt(course_time.fields.period_index) - 1));
+
+                                var upper_block_background_color = upper_block.css("background-color");
+                                if(j == 0 || upper_block_background_color == "rgba(0, 0, 0, 0)"){
+                                    block.text("{0}, {1}".format(course_no, course_name));
                                 }
+                                block.css("background-color", color_code);
                             }
                         }
-                    });
-
-            }
+                    }
+                });
         });
     }
 

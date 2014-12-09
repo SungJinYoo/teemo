@@ -3,6 +3,8 @@
 WEEK_DAYS = [u'mon', u'tue', u'wed', u'thu', u'fri', u'sat', u'sun']
 WEEK_DAYS_KOR = [u'월', u'화', u'수', u'목', u'금', u'토', u'일']
 WEEK_DAY_KEYS = [u'yoil2', u'yoil3', u'yoil4', u'yoil5', u'yoil6', u'yoil7', u'yoil0']  # 월화수목금토 미지정
+WEEK_DAY_TRANS = {WEEK_DAY_KEYS[i]:WEEK_DAYS[i] for i in range(len(WEEK_DAY_KEYS))}
+WEEK_DAY_TRANS_KOR = {WEEK_DAY_KEYS[i]:WEEK_DAYS_KOR[i] for i in range(len(WEEK_DAY_KEYS))}
 
 TIME_TABLE_PERIODS = [
     ('0800', '0830'),

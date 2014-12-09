@@ -37,13 +37,8 @@
                         <input type="hidden" id="grade_input" name="grade" />
                     </fieldset>
                     <fieldset>
-                        <legend>학년 선택</legend>
-                        {% for grade in GRADE_VERBOSE %}
-                            <input type="checkbox" id="{{ grade }}" class="grade_checkbox" value="{{ forloop.counter }}" />
-                            <label for="{{ grade }}">{{ GRADE_VERBOSE_KOR|nth:forloop.counter0 }}</label>
-                        {% endfor %}
-                        <input type="checkbox" id="all" value="all" />
-                        <label for="all">전체</label>
+                        <label for="course_no">수업번호</label>
+                        <input type="text" id="course_no" class="course_no" name="course_no" />
                     </fieldset>
                 </form>
                 <form id="fetch_attendance_data_form" role="form" method="post" action="{% url 'time_table:attendance' %}">
@@ -52,7 +47,8 @@
                     <input id="semester_input" type="hidden" name="semester" />
                     <input id="week_input" type="hidden" name="week" />
                     <input id="block_no" type="hidden" name="block_no" />
-                    <input id="blocks" type="hidden" name="blocks" />
+                    <input id="block_data" type="hidden" name="block_data" />
+					<input class="course_no" type="hidden" name="course_no" />
                 </form>
             <fieldset>
                 <legend>편의기능</legend>
@@ -79,7 +75,7 @@
                                     <th>{{ period }}</th>
                                     {% for day in WEEK_DAY_KEYS %}
                                         {% with forloop.counter0 as col %}
-                                            <td id="{{ day }}_{{ period_number }}" data-row="{{ row }}" data-col="{{ col }}"></td>
+                                            <td id="{{ day }}_{{ period_number }}" data-day="{{ day }}" data-row="{{ row }}" data-col="{{ col }}"></td>
                                         {% endwith %}
                                     {% endfor %}
                                 </tr>
