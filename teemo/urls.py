@@ -15,5 +15,6 @@ urlpatterns = patterns('',
     url(r'^logout/$', LogoutView.as_view(), name='logout'),
     url(r'^student/$', AddStudentView.as_view(), name='add_student'),
     url(r'^time_table/', include('time_table.urls', namespace='time_table')),
+    url(r'^help/$', TemplateView.as_view(template_name='help.html'), name='help'),
     url(r'^admin/', include(admin.site.urls)),
 )

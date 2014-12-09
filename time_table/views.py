@@ -16,20 +16,24 @@ class TimeTableView(LoginRequiredMixin, View):
 
         result = False
         data = []
+        type = u'error'
+        message = u'시간표를 가져오는데 실패하였습니다'
 
         form = TimeTableForm(request.POST)
         if form.is_valid():
-            data = json.loads(serializers.serialize(
-                'json',
-                Course.objects.filter(students__in=Student.objects.filter(courses__in=Course.objects.filter(course_no=form.cleaned_data['course_no']))),
-                relations=('course_times',)
-            ))
-            result = True
-            type = u'success'
-            message = u'시간표를 가져왔습니다'
-        else:
-            type = u'error'
-            message = u'시간표를 가져오는데 실패하였습니다'
+            try:
+                course = Course.objects.filter(course_no=form.cleaned_data['course_no']).get()
+                data = json.loads(serializers.serialize(
+                    'json',
+                    Course.objects.filter(students__in=Student.objects.filter(courses=course)),
+                    relations=('course_times',)
+                ))
+                result = True
+                type = u'success'
+                message = u'''<strong>{}-{}</strong>을(를) 듣는 학생들의 <strong>{}주차</strong> 종합 시간표를 가져왔습니다'''\
+                    .format(course.course_no, course.name, form.cleaned_data['week'])
+            except:
+                pass
 
         response_data = dict(
             result=result,
@@ -63,9 +67,9 @@ class AttendanceView(LoginRequiredMixin, View):
 
             result = True
             data = dict(
+                block_no=form.cleaned_data['block_no'],
                 total_students=total_students,
                 dismiss_students=dismiss_students,
-                attendance_rate=0 if total_students == 0 else float(dismiss_students) / total_students,
             )
             type = u'success'
             message = u'출석 예상 정보를 가져왔습니다<br/>({} {}~{}교시)'.format(WEEK_DAY_TRANS_KOR[block_data['day']],

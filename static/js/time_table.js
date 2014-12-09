@@ -2,6 +2,8 @@
  * Created by sungjinyoo on 12/2/14.
  */
 
+"use strict";
+
 $(document).ready(function(){
     time_table();
 });
@@ -17,33 +19,52 @@ function time_table(){
     }
 
     function initialize_current_year(){
-        var year_span = $("span#year");
-        var fetch_form_year_input = $("#fetch_time_table_form").find("#year_input");
-        var attendance_form_year_input = $("#fetch_attendance_data_form").find("#year_input");
-
+        var year_id = $("#year");
+        var year_class = $(".year");
         var current_year = new Date().getFullYear();
 
-        year_span.text(current_year);
-        fetch_form_year_input.val(current_year);
-        attendance_form_year_input.val(current_year);
+        year_id.text(current_year);
+        year_class.each(function(index, element){
+            $(element).val(current_year);
+        });
     }
 
     function initialize_current_semester(){
-        var fetch_form_semester_input = $("#semester");
-        var attendance_form_semester_input = $("#semester_input");
-        var current_month = new Date().getMonth();
-        var semester = FIRST_SEMESTER; // default to 1학기
-        if(0 <= current_month && current_month < 2) // 겨울학기 (1~2월)
-            semester = 40;
-        else if(2 <= current_month && current_month < 6) // 1학기 (3~6월)
-            semester = FIRST_SEMESTER;
-        else if(6 <= current_month && current_month < 8) // 여름학기 (7~8월)
-            semester = 30;
-        else if(8 <= current_month && current_month < 12)
-            semester = SECOND_SEMESTER;
 
-        fetch_form_semester_input.val(semester);
-        attendance_form_semester_input.val(semester);
+        var semester_id = $("#semester");
+        var semester_class = $(".semester");
+        var current_month = new Date().getMonth();
+
+        var semester = FIRST_SEMESTER; // default to 1학기
+        if(0 <= current_month && current_month < 2) { // 겨울학기 (1~2월)
+            semester = WINTER_SEMESTER;
+        }
+        else if(2 <= current_month && current_month < 6) { // 1학기 (3~6월)
+            semester = FIRST_SEMESTER;
+        }
+        else if(6 <= current_month && current_month < 8) { // 여름학기 (7~8월)
+            semester = SUMMER_SEMESTER;
+        }
+        else if(8 <= current_month && current_month < 12) {
+            semester = SECOND_SEMESTER;
+        }
+
+        if(semester===WINTER_SEMESTER){
+            semester_id.text("겨울 계절");
+        }
+        else if(semester===FIRST_SEMESTER){
+            semester_id.text("1");
+        }
+        else if(semester===SUMMER_SEMESTER){
+            semester_id.text("여름 계절");
+        }
+        else if(semester===SECOND_SEMESTER){
+            semester_id.text("2");
+        }
+
+        semester_class.each(function(index, element){
+            $(element).val(semester);
+        });
         current_semester = semester;
     }
 
@@ -65,21 +86,69 @@ function time_table(){
             start_date = new Date(today.getFullYear(), 8, 1, 0, 0, 0, 0); // sep 1st
         }
 
-        if(start_date.getDay() == 6) start_date.setDate(start_date.getDate() + 2); // saturday + 2 == monday
-        if(start_date.getDay() == 0) start_date.setDate(start_date.getDate() + 1); // sunday + 1 == monday
+        if(start_date.getDay() == 6) { // saturday + 2 == monday
+            start_date.setDate(start_date.getDate() + 2);
+        }
+        if(start_date.getDay() == 0) { // sunday + 1 == monday
+            start_date.setDate(start_date.getDate() + 1);
+        }
 
         week = find_current_week(today, start_date);
-
-        $("#fetch_time_table_form").find("#week_input").val(week).attr("data-value", week);
-        $("#fetch_attendance_data_form").find("#week_input").val(week).attr("data-value", week);
+        $("#week").text(week).attr("data-value", week);
+        var week_class = $(".week");
+        week_class.each(function(index, element){
+            $(element).val(week).attr("data-value", week);
+        });
     }
 
     function initialize_event_handlers(){
+        function append_attendance_info(blocks, attendance_data){
+            var dismiss = attendance_data.dismiss_students;
+            var total = attendance_data.total_students;
+            var attend = total - dismiss;
+            var attendance_rate = total == 0? 0 : attend / total;
+            var left = 0;
+            var top = 0;
+            var width = 0;
+            var height = 0;
+
+            blocks.each(function(index, element){
+                if(index == 0) {
+                    var position = $(element).position();
+                    left = position.left;
+                    top = position.top;
+                    width = $(element).outerWidth();
+                }
+                height += $(element).outerHeight();
+            });
+
+            var attendance_info = $("<div>").addClass("attendance_info").css({
+                top: top,
+                left: left,
+                width: width,
+                height: height,
+                "background-color": get_random_color_code()
+            });
+
+            // TODO: show some buttons when mouse overlaied
+            attendance_info.append($("<button>").addClass("glyphicon glyphicon-ok glyphicon-button menu_button ok_button").click(function(){
+                console.log("ok");
+            }));
+            attendance_info.append($("<button>").addClass("glyphicon glyphicon-remove glyphicon-button menu_button remove_button").click(function(){
+                console.log("remove");
+            }));
+            attendance_info.append($("<div>").addClass("clear-both"))
+            attendance_info.append($("<pre>").append($("<p>").text("총 수강인원: {0}\n예상 참석인원: {1}\n참석예상률: {2}%".format(total, attend, attendance_rate * 100))));
+
+            $("#attendance_info_wrapper").append(attendance_info);
+        }
+
         function fetch_attendance_data(block_no, blocks){
             var form = $("#fetch_attendance_data_form");
+            var period_index_list = [];
+
             form.find("#block_no").val(block_no);
 
-            var period_index_list = [];
             blocks.each(function(index, block){
                 period_index_list.push($(block).attr("data-row"));
             });
@@ -96,18 +165,21 @@ function time_table(){
                 .done(function(json){
                     toast_message(json.type, json.message);
                     if(json.result){
-                        attendance_data = json.data;
-                        console.log(attendance_data);
+                        append_attendance_info(blocks, json.data);
                     }
+                })
+                .always(function(){
+                    blocks.each(function(index, element){
+                        $(this).removeClass("selected").removeAttr("data-block-no").css("background-color", $(this).attr("data-background-color"));
+                        $(this).attr("data-background-color", "");
+                    });
                 });
         }
 
         // event for time table cells
-        var is_select_mode = false;
         var is_mouse_down = false;
         var column = null;
         var block_no = 0;
-        var selected_block_no = null;
         var random_color_code = null;
         $("#time_table").find("td")
             .mousedown(function(){
@@ -115,47 +187,26 @@ function time_table(){
                 random_color_code = get_random_color_code();
 
                 column = $(this).attr("data-col");
-                is_select_mode = !$(this).hasClass("selected");
 
-                if(is_select_mode){
-                    $(this).addClass("selected").attr("data-block-no", block_no).css("background-color", random_color_code);
-                }
-                else{
-                    $(this).removeClass("selected");
-                    selected_block_no = $(this).attr("data-block-no");
-                    $(this).removeAttr("data-block-no").css("background-color", "");
-                }
-
+                $(this).addClass("selected").attr("data-background-color", $(this).css("background-color"))
+                    .attr("data-block-no", block_no).css("background-color", random_color_code);
                 return false; // prevent text selection
             })
             .mouseover(function(){
                 if(is_mouse_down && column == $(this).attr("data-col")){
-                    if(is_select_mode){
-                        $(this).addClass("selected").attr("data-block-no", block_no).css("background-color", random_color_code);
-                    }
-                    else{
-                        $(this).removeClass("selected").removeAttr("data-block-no").css("background-color", "");
-                    }
+                    $(this).addClass("selected").attr("data-background-color", $(this).css("background-color"))
+                        .attr("data-block-no", block_no).css("background-color", random_color_code);
                 }
             })
             .mouseup(function(){
-                is_select_mode = false;
                 is_mouse_down = false;
                 column = null;
 
-                if(selected_block_no){
-                    var blocks = $("#time_table").find("td.selected[data-block-no={0}]".format(selected_block_no));
-                    if(blocks.size() > 0){
-                        fetch_attendance_data(selected_block_no, blocks);
-                        selected_block_no = null;
-                    }
+                var blocks = $("#time_table").find("td.selected[data-block-no={0}]".format(block_no));
+                if(blocks.size() > 0){
+                    fetch_attendance_data(block_no, blocks);
                 }
-                else{
-                    var blocks = $("#time_table").find("td.selected[data-block-no={0}]".format(block_no));
-                    if(blocks.size() > 0){
-                        fetch_attendance_data(block_no++, blocks);
-                    }
-                }
+                block_no++;
             });
 
         // event for week input
@@ -178,11 +229,14 @@ function time_table(){
             });
         });
 
-        $("#course_no").change(function(){
-            var form = $("#fetch_time_table_form");
+        $("#course_no_form").submit(function(e){
+            e.preventDefault();
+            return false;
+        });
 
+        $("#course_no").change(function(){
             var course_no_re = new RegExp("^\\d{5}$");
-            var course_no_input = form.find("#course_no");
+            var course_no_input = $(this);
 
             if(!course_no_re.test(course_no_input.val())){
                 toast_message("warning", "수업번호 형식에 맞지 않습니다");
@@ -192,6 +246,8 @@ function time_table(){
             $(".course_no").each(function(index, element){
                 $(this).val(course_no_input.val());
             });
+
+            var form = $("#fetch_time_table_form");
 
             $.post(
                 form.attr('action'),
@@ -224,7 +280,56 @@ function time_table(){
                     }
                 });
         });
-    }
 
+        // CONTROLLER
+        $("#prev_week").click(function(){
+            var week_id = $("#week");
+            var week_class = $(".week");
+            var current_week = parseInt(week_class.val())-1;
+            if( !(1<=current_week && current_week <=16) ){
+                return  toast_message("error","이전주는 없습니다");
+            }
+            $("#week").text(current_week);
+            week_class.each(function(index, element){
+                $(element).val(current_week);
+            });
+        });
+
+        $("#next_week").click(function(){
+            var week_id = $("#week");
+            var week_class = $(".week");
+            var current_week = parseInt(week_class.val())+1;
+            if( !(1<=current_week && current_week <=16)){
+                return  toast_message("error","다음주는 없습니다");
+            }
+            $("#week").text(current_week);
+            week_class.each(function(index, element){
+                $(element).val(current_week);
+            });
+        });
+    }
+// About arrows
+    $(".arrows").each(function(index, element){
+        $(element).affix({
+            offset: {
+                top: 0
+            }
+        });
+        $(element).hover(function() {
+            /* Stuff to do when the mouse enters the element */
+            $(this).find("span").css("color","#969090");
+        }, function() {
+            /* Stuff to do when the mouse leaves the element */
+            $(this).find("span").css("color","#333333");
+        });
+        $(element).mousedown(function(event) {
+            /* Act on the event */
+            $(this).find("span").css("color","#CA5E58");
+        });
+        $(element).mouseup(function(event) {
+            /* Act on the event */
+            $(this).find("span").css("color","#333333");
+        });
+    });
     initialize();
 }
