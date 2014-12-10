@@ -1,4 +1,3 @@
-
 function inner_add_extra_info(extra_data_list){
 	for(var i=0;i<extra_data_list.length;i++){
 		var extra_data = extra_data_list[i];
@@ -20,28 +19,46 @@ function inner_add_extra_info(extra_data_list){
 			}
 			height += block.outerHeight();
 		}
-		var extra_info = $("<div>").attr("data-pk", extra_data.fields.pk).addClass("extra_info attached_box").css({
-	        top: top,
-	        left: left,
-	        width: width,
-	        height: height,
-	        "background-color": "#ccc"
-	    });
-	    extra_info.append($("<button>").addClass("glyphicon glyphicon-pencil menu_button edit_button").click(function() {
-	        // console.log("edit button pressed");
+		var extra_info = $("<div>").attr("data-pk", extra_data.fields.pk).addClass("extra_info attached_box opaque").css({
+			top: top,
+			left: left,
+			width: width,
+			height: height,
+			"background-color": "#ccc"
+		});
+		extra_info.append($("<button>").addClass("glyphicon glyphicon-pencil menu_button edit_button").click(function() {
+			// console.log("edit button pressed");
 
-	    }));
-	    extra_info.append($("<button>").addClass("glyphicon glyphicon-remove menu_button remove_button").click(function(){
-	        // $(this).parent().remove();
-	        //TODO: remove DB
-        }));
-        $("#extra_info_wrapper").append(extra_info);
+		}));
+		extra_info.append($("<button>").addClass("glyphicon glyphicon-remove menu_button remove_button").click(function(){
+			// $(this).parent().remove();
+			//TODO: remove DB
+		}));
+        extra_info.hover(function() {
+            /* Stuff to do when the mouse enters the element */
+            $(this).removeClass('opaque');
+        }, function() {
+            /* Stuff to do when the mouse leaves the element */
+            $(this).addClass('opaque');
+            
+        });
+		$("#extra_info_wrapper").append(extra_info);
 	}
 }
 
 function add_extra_info(extra_data_list, attendance_info_no){
-	console.log('in add_extra_info');
 	inner_add_extra_info(extra_data_list);
-	$(".attendance_info[data-no={0}]".format(attendance_info_no)).remove();
+	if(attendance_info_no != undefined){
+		$(".attendance_info[data-no={0}]".format(attendance_info_no)).remove();	
+	}
 }
 
+function clear_time_table(){
+}
+
+function clear_extras(){
+	var attendance_info_list = $(".attendance_info");
+	attendance_info_list.each(function(index, element){
+		$(element).remove();
+	});
+}

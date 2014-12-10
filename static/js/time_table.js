@@ -125,7 +125,7 @@ function time_table(){
                 height += $(element).outerHeight();
             });
 
-            var attendance_info = $("<div>").attr("data-no", attendance_info_no++).addClass("attendance_info attatched_box").css({
+            var attendance_info = $("<div>").attr("data-no", attendance_info_no++).addClass("attendance_info attached_box").css({
                 top: top,
                 left: left,
                 width: width,
@@ -179,7 +179,6 @@ function time_table(){
             }));
             attendance_info.append($("<div>").addClass("clear-both"));
             attendance_info.append($("<pre>").append($("<p>").text("총 수강인원: {0}\n예상 참석인원: {1}\n참석예상률: {2}%".format(total, attend, attendance_rate * 100))));
-
             $("#attendance_info_wrapper").append(attendance_info);
         }
 
@@ -318,6 +317,7 @@ function time_table(){
                     toast_message(json.type, json.message);
 
                     if(json.result){
+
                         var extra_data_list = json.data;
                         add_extra_info(extra_data_list);
                     }
@@ -405,7 +405,19 @@ function time_table(){
                 $(this).find("span").css("color","#333333");
             });
         });
-    }
 
+        // attached_box + opaque when mouse over;
+        $(".attached_box").each(function(index, element){
+            $(element).hover(function() {
+                /* Stuff to do when the mouse enters the element */
+                console.log('hover');
+                $(this).addClass('opaque');
+
+            }, function() {
+                /* Stuff to do when the mouse leaves the element */
+                $(this).removeClass('opaque');
+            });
+        });
+    }
     initialize();
 }
