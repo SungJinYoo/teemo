@@ -103,6 +103,8 @@ function time_table(){
     }
 
     function initialize_event_handlers(){
+        var attendance_info_no = 0;
+
         function append_attendance_info(blocks, attendance_data){
             var dismiss = attendance_data.dismiss_students;
             var total = attendance_data.total_students;
@@ -123,7 +125,7 @@ function time_table(){
                 height += $(element).outerHeight();
             });
 
-            var attendance_info = $("<div>").addClass("attendance_info").css({
+            var attendance_info = $("<div>").attr("data-no", attendance_info_no++).addClass("attendance_info").css({
                 top: top,
                 left: left,
                 width: width,
@@ -132,10 +134,85 @@ function time_table(){
             });
 
             // TODO: show some buttons when mouse overlaied
-            attendance_info.append($("<button>").addClass("glyphicon glyphicon-ok glyphicon-button menu_button ok_button").click(function(){
-                console.log("ok");
+            attendance_info.append($("<button>").addClass("glyphicon glyphicon-plus menu_button add_button").click(function(){
+                var modal = $("#add_extra_confirm_modal");
+                modal.modal();
+
+                var form = modal.find("#add_extra_form");
+                form.find(".year").val(attendance_data.year);
+                form.find(".semester").val(attendance_data.semester);
+                form.find(".course_no").val(attendance_data.course_no);
+                form.find(".week").val(attendance_data.week);
+                form.find(".day").val($(blocks[0]).attr("data-day"));
+                form.find(".start_time").val(TIME_TABLE_PERIODS[$(blocks[0]).attr("data-row")][0]);
+                form.find(".end_time").val(TIME_TABLE_PERIODS[$(blocks[blocks.length - 1]).attr("data-row")][1]);
+                form.find(".attendance_info_no").val(attendance_info.attr("data-no"));
+
+                modal.find("#add_extra_button").off("click");
+                modal.find("#add_extra_button").click(function(){
+                    if(!form.find("input[name=category]:checked").val()){
+                        toast_message("warning", "일정 유형을 선택해주세요");
+                        return false;
+                    }
+
+                    $.post(
+                        form.attr("action"),
+                        form.serialize()
+                    )
+                        .done(function(ajax){
+                            toast_message(ajax.type, ajax.message);
+                            if(ajax.result){
+                                // TODO: SPLIT INTO ANOTHER FUNCTION -- add_extra_info(extra_data_list, attendance_no=null)
+                                var extra_data = ajax.data.extra_data[0];
+                                var course_data = extra_data.fields.course;
+                                var time_data_list = extra_data.fields.course_times;
+
+                                // get info layer size from time info and table;
+                                var top = null;
+                                var left = null;
+                                var width = 0;
+                                var height = 0;
+                                for(var i = 0; i < time_data_list.length; i++){
+                                    var time_data = time_data_list[i];
+                                    var block = $("#{0}_{1}".format(time_data.fields.day, time_data.fields.period_index));
+
+                                    if(i == 0){
+                                        top = block.position().top;
+                                        left = block.position().left;
+                                        width = block.outerWidth();
+                                    }
+
+                                    height += block.outerHeight();
+                                }
+
+                                var edit_button = $("<button>").addClass("menu_button edit_button");
+                                var remove_button = $("<button>").addClass("menu_button remove_button");
+                                var extra_info = $("<div>").attr("data-pk", extra_data.fields.pk).addClass("extra_info").css({
+                                    top: top,
+                                    left: left,
+                                    width: width,
+                                    height: height,
+                                    "background-color": "#ccc"
+                                });
+                                extra_info.append($("<button>").addClass("glyphicon glyphicon-remove menu_button edit_button").click(function() {
+                                    console.log("edit button pressed");
+                                }));
+                                extra_info.append($("<button>").addClass("glyphicon glyphicon-remove menu_button remove_button").click(function(){
+                                    console.log("remove button pressed");
+                                }));
+
+
+                                $(".attendance_info[data-no={0}]".format(ajax.data.attendance_info_no)).remove();
+                                $("#extra_info_wrapper").append(extra_info);
+                                // TODO: END OF SPLIT INTO ANOTHER FUNCTION
+                            }
+                        })
+                        .always(function(){
+                            modal.modal("hide");
+                        });
+                });
             }));
-            attendance_info.append($("<button>").addClass("glyphicon glyphicon-remove glyphicon-button menu_button remove_button").click(function(){
+            attendance_info.append($("<button>").addClass("glyphicon glyphicon-remove menu_button remove_button").click(function(){
                 $(this).parent().remove();
             }));
             attendance_info.append($("<div>").addClass("clear-both"));
@@ -210,18 +287,6 @@ function time_table(){
                 block_no++;
             });
 
-        // event for week input
-        $("#fetch_time_table_form").find("#week_input").change(function(){
-            var week = $(this).val();
-            if(!(0 < week && week < 17)){
-                alert("1~16주차만이 입력가능합니다");
-                $(this).val($(this).attr("data-value"));
-                return;
-            }
-            $(this).attr("data-value", $(this).val());
-            $("#fetch_attendance_data_form").find("#week_input").val($(this).val()).attr("data-value", $(this).val());
-        });
-
         // event for util buttons
         $("#reset_button").click(function(){
             var blocks = $("#time_table").find("td.selected");
@@ -248,11 +313,11 @@ function time_table(){
                 $(this).val(course_no_input.val());
             });
 
-            var form = $("#fetch_time_table_form");
+            var fetch_time_table_form = $("#fetch_time_table_form");
 
             $.post(
-                form.attr('action'),
-                form.serialize()
+                fetch_time_table_form.attr('action'),
+                fetch_time_table_form.serialize()
             )
                 .done(function(json){
                     toast_message(json.type, json.message);
@@ -270,9 +335,9 @@ function time_table(){
                                 var course_time = course_time_data[j];
                                 var block = $("#{0}_{1}".format(course_time.fields.day, course_time.fields.period_index));
                                 var upper_block = $("#{0}_{1}".format(course_time.fields.day, parseInt(course_time.fields.period_index) - 1));
-
+                                var current_color = $("#empty").css("background-color", color_code).css("background-color");
                                 var upper_block_background_color = upper_block.css("background-color");
-                                if(j == 0 || upper_block_background_color == "rgba(0, 0, 0, 0)"){
+                                if(j == 0 || upper_block_background_color == "rgba(0, 0, 0, 0)" || current_color != upper_block_background_color){
                                     block.text("{0}, {1}".format(course_no, course_name));
                                 }
                                 block.css("background-color", color_code);
@@ -280,7 +345,99 @@ function time_table(){
                         }
                     }
                 });
+
+            var fetch_extras_form = $("#fetch_extras_form");
+
+            $.post(
+                fetch_extras_form.attr("action"),
+                fetch_extras_form.serialize()
+            )
+                .done(function(json){
+                    toast_message(json.type, json.message);
+
+                    if(json.result){
+                        var extra_data_list = json.data;
+
+                        for(var i = 0; i < extra_data_list.length; i++){
+                            var extra_data = extra_data_list[i];
+
+                            // TODO: SPLIT INTO ANOTHER FUNCTION -- add_extra_info(extra_data_list, attendance_no=null)
+                            var course_data = extra_data.fields.course;
+                            var time_data_list = extra_data.fields.course_times;
+
+                            console.log("3");
+                            // get info layer size from time info and table;
+                            var top = null;
+                            var left = null;
+                            var width = 0;
+                            var height = 0;
+                            for(var j = 0; j < time_data_list.length; j++){
+                                var time_data = time_data_list[j];
+                                var block = $("#{0}_{1}".format(time_data.fields.day, time_data.fields.period_index));
+
+                                if(j == 0){
+                                    top = block.position().top;
+                                    left = block.position().left;
+                                    width = block.outerWidth();
+                                }
+
+                                height += block.outerHeight();
+                            }
+
+                            console.log("4");
+                            var edit_button = $("<button>").addClass("menu_button edit_button");
+                            var remove_button = $("<button>").addClass("menu_button remove_button");
+                            var extra_info = $("<div>").attr("data-pk", extra_data.fields.pk).addClass("extra_info").css({
+                                top: top,
+                                left: left,
+                                width: width,
+                                height: height,
+                                "background-color": "#ccc"
+                            });
+                            extra_info.append($("<button>").addClass("glyphicon glyphicon-pencil menu_button edit_button").click(function() {
+                                console.log("edit button pressed");
+                            }));
+                            extra_info.append($("<button>").addClass("glyphicon glyphicon-remove menu_button remove_button").click(function(){
+                                console.log("remove button pressed");
+                            }));
+
+                            console.log("5");
+//                            $(".attendance_info[data-no={0}]".format(ajax.data.attendance_info_no)).remove();
+                            $("#extra_info_wrapper").append(extra_info);
+                            // TODO: END OF SPLIT INTO ANOTHER FUNCTION
+                        }
+                    }
+                });
         });
+
+        function clear_time_table(){
+
+        }
+
+        function clear_extras(){
+            var attendance_info_list = $(".attendance_info");
+            attendance_info_list.each(function(index, element){
+                $(element).remove();
+            });
+        }
+
+        function fetch_extras(){
+            var form = $("#fetch_extras_form");
+
+            $.post(
+                form.attr("action"),
+                form.serialize()
+            )
+                .done(function(ajax){
+                    clear_extras();
+                    toast_message(ajax.type, ajax.message);
+                    if(ajax.result){
+                        var extras_data = ajax.data;
+
+
+                    }
+                });
+        }
 
         // CONTROLLER
         $("#prev_week").click(function() {

@@ -5,6 +5,7 @@ WEEK_DAYS_KOR = [u'월', u'화', u'수', u'목', u'금', u'토', u'일']
 WEEK_DAY_KEYS = [u'yoil2', u'yoil3', u'yoil4', u'yoil5', u'yoil6', u'yoil7', u'yoil0']  # 월화수목금토 미지정
 WEEK_DAY_TRANS = {WEEK_DAY_KEYS[i]:WEEK_DAYS[i] for i in range(len(WEEK_DAY_KEYS))}
 WEEK_DAY_TRANS_KOR = {WEEK_DAY_KEYS[i]:WEEK_DAYS_KOR[i] for i in range(len(WEEK_DAY_KEYS))}
+WEEK_DAY_TRANS_KOR_REVERSE = {WEEK_DAYS_KOR[i]:WEEK_DAY_KEYS[i] for i in range(len(WEEK_DAYS_KOR))}
 
 TIME_TABLE_PERIODS = [
     ('0800', '0830'),
@@ -92,6 +93,8 @@ GRADES_VERBOSE_KOR = [
 
 FIRST_SEMESTER = 10
 SECOND_SEMESTER = 20
+SUMMER_SEMESTER = 15
+WINTER_SEMESTER = 25
 
 SEMESTERS = [
     FIRST_SEMESTER,  # 1학기
@@ -103,4 +106,10 @@ SEMESTERS = [
 SEMESTERS_VERBOSE = [
     u'1학기',
     u'2학기'
+]
+
+SEMESTER_TRANS = [
+    None,
+    None,None,None,None,None,None,None,None,None,SEMESTERS_VERBOSE[0],
+    None,None,None,None,None,None,None,None,None,SEMESTERS_VERBOSE[1],
 ]

@@ -32,6 +32,51 @@
 		<input id="block_data" type="hidden" name="block_data" />
 		<input class="course_no" type="hidden" name="course_no" />
 	</form>
+	<form id="fetch_extras_form" role="form" method="post" action="{% url 'time_table:extras' %}">
+		{% csrf_token %}
+		<input class="year" type="hidden" name="year" />
+		<input class="semester" type="hidden" name="semester" />
+		<input class="course_no" type="hidden" name="course_no" />
+		<input class="week" type="hidden" name="week" />
+	</form>
+	<!-- Modal -->
+	<div class="modal fade" id="add_extra_confirm_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4 class="modal-title">일정 추가</h4>
+				</div>
+				<div class="modal-body">
+					<form id="add_extra_form" method="post" action="{% url 'time_table:extra' %}">
+						{% csrf_token %}
+						<input class="year" type="hidden" name="year" />
+						<input class="semester" type="hidden" name="semester" />
+						<input class="course_no" type="hidden" name="course_no" />
+						<input class="week" type="hidden" name="week" />
+						<input class="day" type="hidden" name="day" />
+						<input class="start_time" type="hidden" name="start_time" />
+						<input class="end_time" type="hidden" name="end_time" />
+						<input class="attendance_info_no" type="hidden" name="attendance_info_no" />
+						<!-- TODO: change here to use django choice info in model -->
+						<div>
+							<h5>일정 유형</h5>
+							<label><input type="radio" name="category" value="0"/>보강</label>
+							<label><input type="radio" name="category" value="1"/>시험</label>
+						</div>
+						<div>
+							<h5>특이사항</h5>
+							<textarea name="memo" rows="4" cols="90"></textarea>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">취소</button>
+					<button id="add_extra_button" type="button" class="btn btn-primary">추가</button>
+				</div>
+			</div>
+		</div>
+	</div>
 	<div class="row" id="main_box">
 		<div class="container">
 			<div class="col-md-1">
@@ -68,6 +113,7 @@
 					{% endfor %}
 				</table>
 				<div id="attendance_info_wrapper"></div>
+				<div id="extra_info_wrapper"></div>
 			</div>
 			<div class="col-md-1">
 				<div class="arrows" id="next_week">
@@ -76,4 +122,5 @@
 			</div>
 		</div>
 	</div>
+	<div id="empty"></div>
 {% endblock %}

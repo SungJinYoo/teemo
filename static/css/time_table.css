@@ -26,27 +26,37 @@
 	margin-top:300px;
 }
 
-.attendance_info{
+.attendance_info, .extra_info{
     position: absolute;
     border: 1px solid #000;
     overflow: hidden;
 }
-.attendance_info .menu_button{
+.menu_button{
     font-size: 14pt;
 }
-.attendance_info .ok_button{
+.add_button{
     float: left;
     border-color: #40973c;
     color: #40973c;
 }
-.attendance_info .remove_button{
+.remove_button{
     float: right;
     border-color: #af2120;
     color: #af2120;
 }
-.attendance_info pre {
-    margin: 0px;
-    border: 0px;
-    padding: 0px;
+.edit_button{
+    float: left;
+    border-color: yellow;
+    color: yellow;
+}
+
+.attendance_info pre, .extra_info pre {
+    margin: 0;
+    border: 0;
+    padding: 0;
     background-color: inherit;
+}
+
+#empty{
+    display: none;
 }

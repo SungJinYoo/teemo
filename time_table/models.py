@@ -3,37 +3,76 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils.decorators import method_decorator
-from core.constants import WEEK_DAY_KEYS, TIME_TABLE_PERIODS
-from core.utils import fetch_student_time_table, get_current_year, get_current_semester
+from core.constants import WEEK_DAY_KEYS, TIME_TABLE_PERIODS, WEEK_DAY_TRANS_KOR_REVERSE
+from core.utils import fetch_student_time_table, get_current_year, get_current_semester, fetch_courses
 import re
+
+
+class Univ(models.Model):
+    organization_code = models.CharField(verbose_name=u'조직코드', max_length=30)
+    univ_code = models.CharField(verbose_name=u'대학코드', max_length=30, primary_key=True)
+
+    name = models.CharField(verbose_name=u'대학이름', max_length=60, null=True)
+
+    def __unicode__(self):
+        return u'{}({})'.format(self.name, self.univ_code)
+
+
+class Department(models.Model):
+    univ = models.ForeignKey(Univ, related_name='departments', null=True)
+
+    department_code = models.CharField(verbose_name=u'학과코드', max_length=30, primary_key=True)
+
+    name_ko = models.CharField(verbose_name=u'학과이름', max_length=150, null=True)
+    name_en = models.CharField(verbose_name=u'학과이름(영문)', max_length=150, null=True)
+
+    def __unicode__(self):
+        return u'{}({})'.format(self.name_ko, self.department_code)
 
 
 class CourseManager(models.Manager):
     @method_decorator(transaction.atomic)
-    def create(self, year, semester, grade, name, course_no, day, start_time, end_time):
+    def create(self, year, semester, grade, name, name_en, course_no, time_infos):
         time_re = re.compile(
             r'[\d]{2}(:)?[\d]{2}'
         )
-        if not(time_re.match(start_time) and time_re.match(end_time)):
-            raise ValidationError(u'시간의 형식에 맞지 않습니다')
-
-        if ":" in start_time:
-            start_time = start_time[:2] + start_time[2:]
-        if ":" in end_time:
-            end_time = end_time[:2] + end_time[2:]
 
         try:
             course = Course.objects.filter(year=year, semester=semester, course_no=course_no).get()
-            course_times = course.course_times.all()
-            for course_time in CourseTime.objects.filter(day=day, start_time__gte=start_time, end_time__lte=end_time):
+
+        except Course.DoesNotExist:
+            course = Course(year=year, semester=semester, grade=grade, course_no=course_no, name=name, name_en=name_en)
+            course.save()
+
+        course_times = course.course_times.all()
+
+        import sys
+        sys.stdout.write(course_no + " ")
+        sys.stdout.write(name + " ")
+
+        for time_info in time_infos:
+            start_time = time_info['start_time']
+            end_time = time_info['end_time']
+
+            if not (time_re.match(start_time) and time_re.match(end_time)):
+                raise ValidationError(u'시간의 형식에 맞지 않습니다')
+
+            sys.stdout.write(time_info['start_time'] + " ")
+            sys.stdout.write(time_info['end_time'] + " ///")
+            if ":" in start_time:
+                start_time = start_time[:2] + start_time[3:]
+            if ":" in end_time:
+                end_time = end_time[:2] + end_time[3:]
+
+            sys.stdout.write(WEEK_DAY_TRANS_KOR_REVERSE[time_info['day']] + " ")
+            sys.stdout.write(start_time + " ")
+            sys.stdout.write(end_time + " ")
+            for course_time in CourseTime.objects.filter(day=WEEK_DAY_TRANS_KOR_REVERSE[time_info['day']],
+                                                         start_time__gte=start_time,
+                                                         end_time__lte=end_time):
                 if course_time not in course_times:
                     course.course_times.add(course_time)
-        except Course.DoesNotExist:
-            course = Course(year=year, semester=semester, grade=grade, course_no=course_no, name=name)
-            course.save()
-            for course_time in CourseTime.objects.filter(day=day, start_time__gte=start_time, end_time__lte=end_time):
-                course.course_times.add(course_time)
-
+        sys.stdout.write("\n")
         return course
 
 
@@ -58,6 +97,7 @@ class CourseTime(models.Model):
 
 
 class Course(models.Model):
+    department = models.ForeignKey(Department, related_name='courses', null=True)
     course_times = models.ManyToManyField(CourseTime, related_name='courses')
 
     year = models.IntegerField(verbose_name=u'년도', null=False, blank=False)
@@ -65,27 +105,69 @@ class Course(models.Model):
     grade = models.IntegerField(verbose_name=u'학년', null=False, blank=False)
     course_no = models.SlugField(verbose_name=u'학수번호', null=False, blank=False, unique=True)
     name = models.CharField(verbose_name=u'과목이름', max_length=128, null=False, blank=False)
+    name_en = models.CharField(verbose_name=u'과목이름(영어)', max_length=128, null=False, blank=False)
 
     objects = CourseManager()
 
     def __unicode__(self):
         return u'{}-{}'.format(self.course_no, self.name)
 
+    @staticmethod
+    def update_courses(year, semester):
+        course_info_list = fetch_courses(year, semester)
+        for course_info in course_info_list:
+            # year, semester, grade, name, course_no, time_infos
+            time_info_list = list()
+            if course_info['suupTimes']:
+                for time in course_info['suupTimes'].split(','):
+                    # 요일(start_time~end_time)
+                    if len(time.split('(')) > 1:
+                        day, rest = time.split('(')
+                        start_time, end_time = rest[:-1].split('-')
+
+                        time_info_list.append(dict(
+                            day=day,
+                            start_time=start_time,
+                            end_time=end_time
+                        ))
+
+            course = Course.objects.create(year=year, semester=semester, grade=course_info['isuGrade'],
+                                           name=course_info['gwamokNm'], name_en=course_info['gwamokEnm'],
+                                           course_no=course_info['suupNo'], time_infos=time_info_list)
+
+
+class ExtraManager(models.Manager):
+    @method_decorator(transaction.atomic)
+    def create(self, year, semester, course_no, week, category, memo, day, start_time, end_time, **kwargs):
+        course = Course.objects.filter(year=year, semester=semester, course_no=course_no).get()
+
+        extra = Extra(course=course, week=week, category=category, memo=memo)
+        extra.save()
+
+        course_times = CourseTime.objects.filter(day=day, start_time__gte=start_time, end_time__lte=end_time)
+        for course_time in course_times:
+            extra.course_times.add(course_time)
+
+        return extra
+
 
 class Extra(models.Model):
-    ADDITIONAL = 1
-    EXAM = 2
+    ADDITIONAL = 0
+    EXAM = 1
 
-    EXTRA_TYPE_CHOICES = (
+    EXTRA_CATEGORY_CHOICES = (
         (ADDITIONAL, u'보강'),
         (EXAM, u'시험'),
     )
 
     course = models.ForeignKey(Course, related_name='extras')
-    course_times = models.ManyToManyField(CourseTime, related_name='extra')
+    course_times = models.ManyToManyField(CourseTime, related_name='extras')
 
     week = models.IntegerField(verbose_name=u'주차', null=False, blank=False)
-    type = models.IntegerField(verbose_name=u'타입', null=False, blank=False, choices=EXTRA_TYPE_CHOICES)
+    category = models.IntegerField(verbose_name=u'유형', null=False, blank=False, choices=EXTRA_CATEGORY_CHOICES)
+    memo = models.CharField(verbose_name=u'메모', max_length=256, null=True, blank=True)
+
+    objects = ExtraManager()
 
     def __unicode__(self):
         return u'{} {} {}'.format(self.week, self.type, self.course.name)
@@ -96,50 +178,17 @@ class Student(models.Model):
     student_id = models.SlugField(verbose_name=u'학번', null=False, blank=False)
     courses = models.ManyToManyField(Course, related_name='students')
 
-    def _add_course(self, week_course_dict):
-        course = Course.objects.create(**week_course_dict)
-        self.courses.add(course)
-
     def add_course(self):
         year = get_current_year()
         semester = get_current_semester()
         time_table_data = fetch_student_time_table(self.student_id, year, semester)
 
-        week_course_dict = {day: None for day in WEEK_DAY_KEYS}
-
         for period_index, period_data in enumerate(time_table_data):
-            start_time, end_time = TIME_TABLE_PERIODS[period_index]
             for day in WEEK_DAY_KEYS:
                 if period_data[day]:
                     course_no, name, trash1, trash2, trash3 = period_data[day].split(',')
-                    if week_course_dict[day]:
-                        if week_course_dict[day]['name'] == name:
-                            week_course_dict[day]['end_time'] = end_time
-                        else:
-                            self._add_course(week_course_dict[day])
-                            week_course_dict[day] = dict(
-                                year=year,
-                                semester=semester,
-                                grade=0,
-                                course_no=course_no,
-                                name=name,
-                                start_time=start_time,
-                                day=day,
-                            )
-                    else:
-                        week_course_dict[day] = dict(
-                            year=year,
-                            semester=semester,
-                            grade=0,
-                            course_no=course_no,
-                            name=name,
-                            start_time=start_time,
-                            day=day,
-                        )
-                else:
-                    if week_course_dict[day]:
-                        self._add_course(week_course_dict[day])
-                        week_course_dict[day] = None
+                    course = Course.objects.filter(year=year, semester=semester, course_no=course_no).get()
+                    self.courses.add(course)
 
     def __unicode__(self):
         return u'{}'.format(self.student_id)

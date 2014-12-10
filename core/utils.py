@@ -143,6 +143,49 @@ def fetch_student_time_table(student_id, year, semester):
     return result['DS_SUUPSC10TTM01'][0]['list']
 
 
+def fetch_courses(year, semester):
+    fetch_course_url = 'https://portal.hanyang.ac.kr/sugang/SgscAct/findSuupSearchSugangSiganpyo.do'
+    headers = dict(
+        host='portal.hanyang.ac.kr',
+        connection='keep-alive',
+        accept='application/json, text/javascript, */*; q=0.01',
+        origin='https://portal.hanyang.ac.kr',
+    )
+    headers['X-Requested-With'] = 'XMLHttpRequest'
+    headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36'
+    headers['Content-Type'] = 'application/json+sua; charset=UTF-8'
+    headers['Accept-Encoding'] = 'gzip, deflate'
+    headers['Accept-Language'] = 'ko-KR,ko;q=0.8,en-US;q=0.6,en;q=0.4'
+
+    # jojik을 에리카로 할 것
+    jojik_code = "Y0000316"
+    payload = dict(
+        skipRows="0",
+        maxRows="10000",
+        strLocaleGb="ko",
+        strIsSugangSys="true",
+        strDetailGb="0",
+        notAppendQrys="true",
+        strSuupOprGb="0",
+        strJojik=jojik_code,
+        strSuupYear=str(year),
+        strSuupTerm=str(semester),
+        strIlbanCommonGb="",
+        strIsuGbCd="",
+        strHaksuNo="",
+        strGwamok="",
+        strDaehak="",
+        strHakgwa="",
+        strYeongyeok=""
+    )
+
+    r = requests.post(fetch_course_url, headers=headers, data=json.dumps(payload))
+
+    result = json.loads(r.text)
+
+    return result['DS_SUUPGS03TTM01'][0]['list']
+
+
 def get_current_year():
     from datetime import datetime
 
