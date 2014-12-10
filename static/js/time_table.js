@@ -125,7 +125,7 @@ function time_table(){
                 height += $(element).outerHeight();
             });
 
-            var attendance_info = $("<div>").attr("data-no", attendance_info_no++).addClass("attendance_info").css({
+            var attendance_info = $("<div>").attr("data-no", attendance_info_no++).addClass("attendance_info attatched_box").css({
                 top: top,
                 left: left,
                 width: width,
@@ -162,49 +162,11 @@ function time_table(){
                         .done(function(ajax){
                             toast_message(ajax.type, ajax.message);
                             if(ajax.result){
+
                                 // TODO: SPLIT INTO ANOTHER FUNCTION -- add_extra_info(extra_data_list, attendance_no=null)
                                 var extra_data = ajax.data.extra_data[0];
-                                var course_data = extra_data.fields.course;
-                                var time_data_list = extra_data.fields.course_times;
-
-                                // get info layer size from time info and table;
-                                var top = null;
-                                var left = null;
-                                var width = 0;
-                                var height = 0;
-                                for(var i = 0; i < time_data_list.length; i++){
-                                    var time_data = time_data_list[i];
-                                    var block = $("#{0}_{1}".format(time_data.fields.day, time_data.fields.period_index));
-
-                                    if(i == 0){
-                                        top = block.position().top;
-                                        left = block.position().left;
-                                        width = block.outerWidth();
-                                    }
-
-                                    height += block.outerHeight();
-                                }
-
-                                var edit_button = $("<button>").addClass("menu_button edit_button");
-                                var remove_button = $("<button>").addClass("menu_button remove_button");
-                                var extra_info = $("<div>").attr("data-pk", extra_data.fields.pk).addClass("extra_info").css({
-                                    top: top,
-                                    left: left,
-                                    width: width,
-                                    height: height,
-                                    "background-color": "#ccc"
-                                });
-                                extra_info.append($("<button>").addClass("glyphicon glyphicon-remove menu_button edit_button").click(function() {
-                                    console.log("edit button pressed");
-                                }));
-                                extra_info.append($("<button>").addClass("glyphicon glyphicon-remove menu_button remove_button").click(function(){
-                                    console.log("remove button pressed");
-                                }));
-
-
-                                $(".attendance_info[data-no={0}]".format(ajax.data.attendance_info_no)).remove();
-                                $("#extra_info_wrapper").append(extra_info);
-                                // TODO: END OF SPLIT INTO ANOTHER FUNCTION
+                                // Call function with arg[1];
+                                add_extra_info(extra_data_list,ajax.data.attendance_info_no);
                             }
                         })
                         .always(function(){
@@ -357,55 +319,7 @@ function time_table(){
 
                     if(json.result){
                         var extra_data_list = json.data;
-
-                        for(var i = 0; i < extra_data_list.length; i++){
-                            var extra_data = extra_data_list[i];
-
-                            // TODO: SPLIT INTO ANOTHER FUNCTION -- add_extra_info(extra_data_list, attendance_no=null)
-                            var course_data = extra_data.fields.course;
-                            var time_data_list = extra_data.fields.course_times;
-
-                            console.log("3");
-                            // get info layer size from time info and table;
-                            var top = null;
-                            var left = null;
-                            var width = 0;
-                            var height = 0;
-                            for(var j = 0; j < time_data_list.length; j++){
-                                var time_data = time_data_list[j];
-                                var block = $("#{0}_{1}".format(time_data.fields.day, time_data.fields.period_index));
-
-                                if(j == 0){
-                                    top = block.position().top;
-                                    left = block.position().left;
-                                    width = block.outerWidth();
-                                }
-
-                                height += block.outerHeight();
-                            }
-
-                            console.log("4");
-                            var edit_button = $("<button>").addClass("menu_button edit_button");
-                            var remove_button = $("<button>").addClass("menu_button remove_button");
-                            var extra_info = $("<div>").attr("data-pk", extra_data.fields.pk).addClass("extra_info").css({
-                                top: top,
-                                left: left,
-                                width: width,
-                                height: height,
-                                "background-color": "#ccc"
-                            });
-                            extra_info.append($("<button>").addClass("glyphicon glyphicon-pencil menu_button edit_button").click(function() {
-                                console.log("edit button pressed");
-                            }));
-                            extra_info.append($("<button>").addClass("glyphicon glyphicon-remove menu_button remove_button").click(function(){
-                                console.log("remove button pressed");
-                            }));
-
-                            console.log("5");
-//                            $(".attendance_info[data-no={0}]".format(ajax.data.attendance_info_no)).remove();
-                            $("#extra_info_wrapper").append(extra_info);
-                            // TODO: END OF SPLIT INTO ANOTHER FUNCTION
-                        }
+                        add_extra_info(extra_data_list);
                     }
                 });
         });

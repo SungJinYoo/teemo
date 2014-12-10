@@ -26,10 +26,15 @@
 	margin-top:300px;
 }
 
-.attendance_info, .extra_info{
+.attached_box{
     position: absolute;
-    border: 1px solid #000;
-    overflow: hidden;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.5);
+
+    background-color: #FFF;
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    outline: 0px none;
 }
 .menu_button{
     font-size: 14pt;
