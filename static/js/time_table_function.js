@@ -29,17 +29,19 @@ function inner_add_extra_info(extra_data_list){
 		extra_info.append($("<button>").addClass("glyphicon glyphicon-pencil menu_button edit_button").click(function() {
 			// console.log("edit button pressed");
 
-		}));
+		}).hide());
 		extra_info.append($("<button>").addClass("glyphicon glyphicon-remove menu_button remove_button").click(function(){
 			// $(this).parent().remove();
 			//TODO: remove DB
-		}));
+		}).hide());
         extra_info.hover(function() {
             /* Stuff to do when the mouse enters the element */
             $(this).removeClass('opaque');
+            $(this).children().show();
         }, function() {
             /* Stuff to do when the mouse leaves the element */
             $(this).addClass('opaque'); 
+            $(this).children().hide();
         });
 		$("#extra_info_wrapper").append(extra_info);
 	}
