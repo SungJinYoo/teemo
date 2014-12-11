@@ -39,8 +39,7 @@ function inner_add_extra_info(extra_data_list){
             $(this).removeClass('opaque');
         }, function() {
             /* Stuff to do when the mouse leaves the element */
-            $(this).addClass('opaque');
-            
+            $(this).addClass('opaque'); 
         });
 		$("#extra_info_wrapper").append(extra_info);
 	}
@@ -52,8 +51,24 @@ function add_extra_info(extra_data_list, attendance_info_no){
 		$(".attendance_info[data-no={0}]".format(attendance_info_no)).remove();	
 	}
 }
-
-function clear_time_table(){
+function reload_extre_info(extra_data_list){
+	// remove Current extra_info;
+	$(".extra_info").each(function(index, element){
+		$(this).remove();
+	});
+	// load extra_info;
+	var fetch_extras_form = $("#fetch_extras_form");
+    $.post(
+        fetch_extras_form.attr("action"),
+        fetch_extras_form.serialize()
+    )
+    .done(function(json){
+        toast_message(json.type, json.message);
+        if(json.result){
+            var extra_data_list = json.data;
+            add_extra_info(extra_data_list);
+        }
+    });
 }
 
 function clear_extras(){

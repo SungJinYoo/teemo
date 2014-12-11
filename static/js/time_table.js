@@ -313,20 +313,14 @@ function time_table(){
                 fetch_extras_form.attr("action"),
                 fetch_extras_form.serialize()
             )
-                .done(function(json){
-                    toast_message(json.type, json.message);
-
-                    if(json.result){
-
-                        var extra_data_list = json.data;
-                        add_extra_info(extra_data_list);
-                    }
-                });
+            .done(function(json){
+                toast_message(json.type, json.message);
+                if(json.result){
+                    var extra_data_list = json.data;
+                    add_extra_info(extra_data_list);
+                }
+            });
         });
-
-        function clear_time_table(){
-
-        }
 
         function clear_extras(){
             var attendance_info_list = $(".attendance_info");
@@ -404,19 +398,7 @@ function time_table(){
                 /* Act on the event */
                 $(this).find("span").css("color","#333333");
             });
-        });
-
-        // attached_box + opaque when mouse over;
-        $(".attached_box").each(function(index, element){
-            $(element).hover(function() {
-                /* Stuff to do when the mouse enters the element */
-                console.log('hover');
-                $(this).addClass('opaque');
-
-            }, function() {
-                /* Stuff to do when the mouse leaves the element */
-                $(this).removeClass('opaque');
-            });
+            $(element).click(reload_extre_info);
         });
     }
     initialize();
