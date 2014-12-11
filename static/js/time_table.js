@@ -341,8 +341,6 @@ function time_table(){
                     toast_message(ajax.type, ajax.message);
                     if(ajax.result){
                         var extras_data = ajax.data;
-
-
                     }
                 });
         }
@@ -382,7 +380,6 @@ function time_table(){
                     top: 0
                 }
             });
-
             $(element).hover(function() {
                 /* Stuff to do when the mouse enters the element */
                 $(this).find("span").css("color","#969090");
