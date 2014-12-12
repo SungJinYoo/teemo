@@ -126,7 +126,7 @@ TEMPLATE_DIRS = (
 )
 
 AUTH_USER_MODEL = 'time_table.User'
-# serializer settings
-# SERIALIZATION_MODULES = {
-#     'json': 'core.serializers.json_serializer'
-# }
+serializer settings
+SERIALIZATION_MODULES = {
+    'json': 'core.serializers.json_serializer'
+}
