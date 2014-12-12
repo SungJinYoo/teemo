@@ -39,6 +39,10 @@
 .opaque{
     opacity: 0.3;
 }
+.top_layer{
+    z-index : 999;
+}
+
 .menu_button{
     font-size: 14pt;
 }
@@ -63,6 +67,10 @@
     border: 0;
     padding: 0;
     background-color: inherit;
+}
+#extra_area{
+    width: 100%;
+    resize: none;
 }
 
 #empty{

@@ -135,7 +135,9 @@ function time_table(){
 
             // TODO: show some buttons when mouse overlaied
             attendance_info.append($("<button>").addClass("glyphicon glyphicon-plus menu_button add_button").click(function(){
-                var modal = $("#add_extra_confirm_modal");
+                $(this).parent().remove();
+
+                var modal = $("#main_modal");
                 modal.modal();
 
                 var form = modal.find("#add_extra_form");
@@ -154,7 +156,6 @@ function time_table(){
                         toast_message("warning", "일정 유형을 선택해주세요");
                         return false;
                     }
-
                     $.post(
                         form.attr("action"),
                         form.serialize()
@@ -162,20 +163,19 @@ function time_table(){
                         .done(function(ajax){
                             toast_message(ajax.type, ajax.message);
                             if(ajax.result){
-
-                                // TODO: SPLIT INTO ANOTHER FUNCTION -- add_extra_info(extra_data_list, attendance_no=null)
-                                var extra_data = ajax.data.extra_data[0];
-                                // Call function with arg[1];
-                                add_extra_info(extra_data_list,ajax.data.attendance_info_no);
+                                add_extra_info(ajax.data.extra_data, ajax.data.attendance_info_no);
                             }
                         })
                         .always(function(){
                             modal.modal("hide");
                         });
+                modal.modal("hide");
+                // TODO: add_extra_info();
                 });
             }));
             attendance_info.append($("<button>").addClass("glyphicon glyphicon-remove menu_button remove_button").click(function(){
                 $(this).parent().remove();
+                // modal.modal("hide");
             }));
             attendance_info.append($("<div>").addClass("clear-both"));
             attendance_info.append($("<pre>").append($("<p>").text("총 수강인원: {0}\n예상 참석인원: {1}\n참석예상률: {2}%".format(total, attend, attendance_rate * 100))));
@@ -317,7 +317,8 @@ function time_table(){
                 toast_message(json.type, json.message);
                 if(json.result){
                     var extra_data_list = json.data;
-                    add_extra_info(extra_data_list);
+                    // add_extra_info(extra_data_list);
+                    reload_extra_info(extra_data_list);
                 }
             });
         });
