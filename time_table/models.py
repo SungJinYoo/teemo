@@ -150,7 +150,7 @@ def add_student(student_id):
 
     try:
         student.add_course()
-        return True, u'success', u'학번 {} 추가되었습니다'.format(student.student_id)
+        return True, u'success', u'학번 {} 추가되었습니다'.format(student.userid)
     except Exception as e:
         return False, u'danger', u'학생 추가에 실패하였습니다'
 
