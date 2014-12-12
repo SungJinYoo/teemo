@@ -59,7 +59,7 @@ class StudentTimeTableView(LoginRequiredForAjaxMixin, View):
             data = json.loads(serializers.serialize(
                 'json',
                 request.user.courses.filter(year=form.cleaned_data['year'],
-                                            semester=form.cleaned_data['semeter']),
+                                            semester=form.cleaned_data['semester']),
                 relations=('course_times',)
             ))
 
