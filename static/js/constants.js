@@ -54,3 +54,10 @@ var EXTRA_CATEGORY_VERBOSE = [
     "보강",
     "시험"
 ];
+
+var COLOR_SELECT = [
+    "additional_lecture",
+    "exam",
+    "assignment",
+    "cancel_lecture"
+];

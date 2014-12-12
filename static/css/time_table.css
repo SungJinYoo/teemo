@@ -32,12 +32,12 @@
     background-color: #FFF;
     background-clip: padding-box;
     border: 1px solid;
-    border-color: #C5270B;
+    border-color: #8F190D;
     border-radius: 6px;
     outline: 0px none;
 }
 .opaque{
-    opacity: 0.3;
+    opacity: 0.4;
 }
 .top_layer{
     z-index : 999;
@@ -45,21 +45,24 @@
 
 .menu_button{
     font-size: 14pt;
+    border-radius: 6px;
+    border: 0;
+    background-color: inherit;
 }
 .add_button{
     float: left;
-    border-color: #40973c;
     color: #40973c;
 }
 .remove_button{
     float: right;
-    border-color: #af2120;
-    color: #af2120;
+    color: #C5270B;
 }
 .edit_button{
     float: left;
-    border-color: yellow;
-    color: yellow;
+}
+
+.menu_button_wrapper{
+
 }
 
 .attendance_info pre, .extra_info pre {
@@ -68,9 +71,32 @@
     padding: 0;
     background-color: inherit;
 }
+.clear{
+    clear: both;
+}
+#info_ul{
+    text-align: center;
+    padding-left: 0;
+    list-style-type: none;
+}
 #extra_area{
     width: 100%;
     resize: none;
+}
+/* 보강 시험 과제 휴강*/
+
+.additional_lecture{
+    background-color: #9C87CD;
+}
+
+.exam{
+    background-color: #D34B47;
+}
+.assignment{
+    background-color: #D3BB47;
+}
+.cancel_lecture{
+    background-color: #38A63F;
 }
 
 #empty{
