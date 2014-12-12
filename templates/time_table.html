@@ -52,6 +52,13 @@
 		<input class="semester" type="hidden" name="semester">
 		<input class="week" type="hidden" name="week">
 	</form>
+
+	<form id="student_extras_form" method="post" action="{% url 'time_table:student_extras' %}">
+		{% csrf_token %}
+		<input class="year" type="hidden" name="year">
+		<input class="semester" type="hidden" name="semester">
+		<input class="week" type="hidden" name="week">
+	</form>
 	
 	<!-- Modal -->
 	<div class="modal fade" id="main_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

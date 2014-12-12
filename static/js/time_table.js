@@ -11,7 +11,7 @@ $(document).ready(function(){
             student_form.serialize()
         )
             .done(function(json){
-                // toast_message(ajax.type, ajax.message);
+                toast_message(ajax.type, ajax.message);
                 if(json.result){
                     var time_table_data = json.data;
                     for(var i = 0; i < time_table_data.length; i++){
@@ -35,6 +35,17 @@ $(document).ready(function(){
                     }
                 }
             })
+    
+    var student_extras = $("#student_extras_form");
+    $.post(
+            student_form.attr("action"),
+            student_form.serialize()
+        )
+        .done(function(json){
+            if(json.result){
+                reload_extra_info(student_extras_form);    
+            }
+        }
 });
 
 function time_table(){
@@ -425,7 +436,9 @@ function time_table(){
                 /* Act on the event */
                 $(this).find("span").css("color","#333333");
             });
-            $(element).click(reload_extra_info);
+            $(element).click(function(){
+                reload_extra_info($("fetch_extras_form"));
+            }
         });
     }
     initialize();

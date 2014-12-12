@@ -125,19 +125,16 @@ function add_extra_info(extra_data_list, attendance_info_no){
 		$(".attendance_info[data-no={0}]".format(attendance_info_no)).remove();	
 	}
 }
-function remove_extra_info(){
 
-}
-function reload_extra_info(extra_data_list){
+function reload_extra_info(form){
 	// remove Current extra_info;
 	$(".extra_info").each(function(index, element){
 		$(this).remove();
 	});
 	// load extra_info;
-	var fetch_extras_form = $("#fetch_extras_form");
     $.post(
-        fetch_extras_form.attr("action"),
-        fetch_extras_form.serialize()
+        form.attr("action"),
+        form.serialize()
     )
     .done(function(json){
         toast_message(json.type, json.message);
