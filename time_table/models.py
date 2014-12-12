@@ -46,10 +46,6 @@ class CourseManager(models.Manager):
 
         course_times = course.course_times.all()
 
-        import sys
-        sys.stdout.write(course_no + " ")
-        sys.stdout.write(name + " ")
-
         for time_info in time_infos:
             start_time = time_info['start_time']
             end_time = time_info['end_time']
@@ -57,22 +53,16 @@ class CourseManager(models.Manager):
             if not (time_re.match(start_time) and time_re.match(end_time)):
                 raise ValidationError(u'시간의 형식에 맞지 않습니다')
 
-            sys.stdout.write(time_info['start_time'] + " ")
-            sys.stdout.write(time_info['end_time'] + " ///")
             if ":" in start_time:
                 start_time = start_time[:2] + start_time[3:]
             if ":" in end_time:
                 end_time = end_time[:2] + end_time[3:]
 
-            sys.stdout.write(WEEK_DAY_TRANS_KOR_REVERSE[time_info['day']] + " ")
-            sys.stdout.write(start_time + " ")
-            sys.stdout.write(end_time + " ")
             for course_time in CourseTime.objects.filter(day=WEEK_DAY_TRANS_KOR_REVERSE[time_info['day']],
                                                          start_time__gte=start_time,
                                                          end_time__lte=end_time):
                 if course_time not in course_times:
                     course.course_times.add(course_time)
-        sys.stdout.write("\n")
         return course
 
 
@@ -114,8 +104,12 @@ class Course(models.Model):
 
     @staticmethod
     def update_courses(year, semester):
+        print 'Getting course information from portal'
         course_info_list = fetch_courses(year, semester)
-        for course_info in course_info_list:
+        total = len(course_info_list)
+
+        print 'Inserting into the database'
+        for index, course_info in enumerate(course_info_list, start=1):
             # year, semester, grade, name, course_no, time_infos
             time_info_list = list()
             if course_info['suupTimes']:
@@ -134,6 +128,9 @@ class Course(models.Model):
             course = Course.objects.create(year=year, semester=semester, grade=course_info['isuGrade'],
                                            name=course_info['gwamokNm'], name_en=course_info['gwamokEnm'],
                                            course_no=course_info['suupNo'], time_infos=time_info_list)
+
+            print '[{}/{}]'.format(index, total)
+        print 'Done'
 
 
 class ExtraManager(models.Manager):
