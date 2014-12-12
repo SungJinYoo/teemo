@@ -141,7 +141,11 @@
 	<div class="row" id="main_box">
 		<div class="container">
 			<div class="col-md-1">
+			{% if user.is_authenticated and user.is_professor %}
 				<div class="arrows" id="prev_week">
+			{% else %}
+				<div class="arrows student-arrow" id="prev_week">
+			{% endif %}
 					<p><span class="glyphicon glyphicon-chevron-left"></span></p>
 				</div>
 			</div>
@@ -177,7 +181,11 @@
 				<div id="extra_info_wrapper"></div>
 			</div>
 			<div class="col-md-1">
+			{% if user.is_authenticated and user.is_professor %}
 				<div class="arrows" id="next_week">
+			{% else %}
+				<div class="arrows student-arrow" id="next_week">
+			{% endif %}
 					<p><span class="glyphicon glyphicon-chevron-right"></span></p>
 				</div>
 			</div>

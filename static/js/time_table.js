@@ -11,7 +11,7 @@ $(document).ready(function(){
             student_form.serialize()
         )
             .done(function(json){
-                toast_message(ajax.type, ajax.message);
+                toast_message(json.type, json.message);
                 if(json.result){
                     var time_table_data = json.data;
                     for(var i = 0; i < time_table_data.length; i++){
@@ -36,7 +36,7 @@ $(document).ready(function(){
                 }
             })
     
-    var student_extras = $("#student_extras_form");
+    var student_extras_form = $("#student_extras_form");
     $.post(
             student_form.attr("action"),
             student_form.serialize()
@@ -45,7 +45,7 @@ $(document).ready(function(){
             if(json.result){
                 reload_extra_info(student_extras_form);    
             }
-        }
+        });
 });
 
 function time_table(){
@@ -415,6 +415,10 @@ function time_table(){
         });
 
         // About arrows
+        function arrow_clicked(){
+            reload_extra_info($("#fetch_extras_form"));
+        }
+
         $(".arrows").each(function(index, element){
             $(element).affix({
                 offset: {
@@ -436,10 +440,16 @@ function time_table(){
                 /* Act on the event */
                 $(this).find("span").css("color","#333333");
             });
-            $(element).click(function(){
-                reload_extra_info($("fetch_extras_form"));
-            }
+            $(element).click(arrow_clicked);
         });
+
+        $(".student-arrow").each(function(index, element){
+            $(element).off("click", arrow_clicked);
+            $(element).click(function(){
+                reload_extra_info($("#student_extras_form"));
+            });
+        });
+
     }
     initialize();
 }

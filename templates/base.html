@@ -31,20 +31,28 @@
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 			<ul class="nav navbar-nav">
 				<li><a href="{% url 'help' %}">사용 방법</a></li>
-				<li><a href="{% url 'index' %}">그시간 내꺼!</a></li>
+				<li><a href="{% url 'index' %}">ClassMaker</a></li>
 				{% if user.is_authenticated and user.is_professor %}
 				<li><a href="{% url 'add_student' %}">학생 추가</a></li>
 				{% endif %}
 			</ul>
 			<form id="course_no_form" class="navbar-form navbar-left" role="search">
+				{% if user.is_authenticated and user.is_professor %}
 				<div class="form-group">
-					<label for="course_no"></label>
-					<input id="course_no" type="text" class="form-control" placeholder="수업 번호" maxlength="5">
+					<!-- <label for="course_no"></label>
+					<input id="course_no" type="text" class="form-control" placeholder="수업 번호" maxlength="5"> -->
+					<select id="course_no">
+						<option selected="selected">-----------------------------------</option>
+					{% for course in user.teaching_courses.all %}
+						<option value="{{ course.course_no }}">{{ course.name }} - [ {{ course.course_no }} ]</option>
+					{% endfor %}
+					</select>
 				</div>
+				{% endif %}
 			</form>
 			<ul class="nav navbar-nav navbar-right">
 				{% if user.is_authenticated %}
-					<li><p class="navbar-text">Signed in as <a href="#" class="navbar-link">{{ user }}</a></p></li>
+					<li><p class="navbar-text">Signed in as <a href="#" class="navbar-link">{{ user.userid }}</a></p></li>
 					<li><a href="{% url 'logout' %}" class="navbar-link">Logout</a></li>
 				{% else %}
 					<li><a href="{% url 'login' %}" class="navbar-link">Login</a></li>
