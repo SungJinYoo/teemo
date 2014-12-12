@@ -43,14 +43,20 @@ class UserManager(BaseUserManager):
         return user
 
     def get_or_create_student(self, userid, password, **extra_fields):
-        try:
-            student = self.students(userid=userid, is_active=True).get()
-            student.set_password(password)
-            student.save()
-        except User.DoesNotExist:
-            student = self.create_student(userid, password, **extra_fields)
+        student = self.students(userid=userid, is_active=True)
+        if student:
+            return student.get()
 
-        return student
+        student = self.students(userid=userid, is_active=False)
+        if student:
+            student = student.get()
+            student.set_password(password)
+            student.is_active = True
+            student.save()
+
+            return student
+
+        return self.create_student(userid, password, **extra_fields)
 
     def create_professor(self, userid, password, **extra_fields):
         user = self.create_user(userid, password, **extra_fields)
