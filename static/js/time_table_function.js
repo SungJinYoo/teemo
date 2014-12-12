@@ -19,23 +19,24 @@ function inner_add_extra_info(extra_data_list){
 			}
 			height += block.outerHeight();
 		}
-		var extra_info = $("<div>").attr("data-pk", extra_data.fields.pk).addClass("extra_info attached_box opaque").css({
+		var extra_info = $("<div>").attr("data-pk", extra_data.fields.pk).addClass("extra_info attached_box opaque {0}".format(COLOR_SELECT[extra_data.fields.category])).css({
 			top: top,
 			left: left,
 			width: width,
 			height: height,
-			"background-color": "#ccc"
 		});
-		extra_info.append($("<button>").addClass("glyphicon glyphicon-pencil menu_button edit_button").click(function() {
-			// console.log("edit button pressed");
-
-		}).hide());
-		extra_info.append($("<button>").addClass("glyphicon glyphicon-remove menu_button remove_button").click(function(){
-			// $(this).parent().remove();
+		var edit_button = $("<button>").addClass("glyphicon glyphicon-pencil menu_button edit_button").click(function(){
+			// TODO : 
+		}).hide();
+		var remove_button = $("<button>").addClass("glyphicon glyphicon-remove menu_button remove_button").click(function(){
 			//TODO: remove DB
-		}).hide());
+		}).hide();
+		var menu_button_wrapper = $("<div>").addClass("menu_button_wrapper");
+		menu_button_wrapper.append([edit_button, remove_button]);
+		extra_info.append(menu_button_wrapper);
 
-		var ul_element = $("<ul>");
+		var ul_element = $("<ul>").attr("id","info_ul");
+		ul_element.addClass("clear");
 		var li_course_name = $("<li>").text(extra_data.fields.course.fields.name);
 		var li_memo = $("<li>").text(extra_data.fields.memo);
 

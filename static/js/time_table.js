@@ -317,8 +317,7 @@ function time_table(){
                 toast_message(json.type, json.message);
                 if(json.result){
                     var extra_data_list = json.data;
-                    // add_extra_info(extra_data_list);
-                    reload_extra_info(extra_data_list);
+                    add_extra_info(extra_data_list);
                 }
             });
         });
