@@ -44,3 +44,9 @@ class FetchExtraForm(forms.Form):
     semester = forms.IntegerField()
     course_no = forms.SlugField()
     week = forms.IntegerField()
+
+
+class StudentExtraForm(forms.Form):
+    year = forms.IntegerField()
+    semester = forms.IntegerField()
+    week = forms.IntegerField()

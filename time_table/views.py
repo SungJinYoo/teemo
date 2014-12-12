@@ -7,7 +7,8 @@ from django.views.generic.base import View
 from django.views.generic.edit import DeleteView
 from core.constants import WEEK_DAY_TRANS_KOR, SEMESTER_TRANS
 from core.views import LoginRequiredForAjaxMixin
-from time_table.forms import TimeTableForm, AttendanceForm, ExtraForm, FetchExtraForm, StudentTimeTableForm
+from time_table.forms import TimeTableForm, AttendanceForm, ExtraForm, FetchExtraForm, StudentTimeTableForm, \
+    StudentExtraForm
 from time_table.models import Course, CourseTime, Extra, User
 
 
@@ -68,6 +69,8 @@ class StudentTimeTableView(LoginRequiredForAjaxMixin, View):
         response_data = dict(
             result=result,
             data=data,
+            type=u'success',
+            message=u''
         )
 
         return HttpResponse(json.dumps(response_data), content_type='application/json')
@@ -237,6 +240,35 @@ class ExtraListView(LoginRequiredForAjaxMixin, View):
             data=data,
             type=type,
             message=message
+        )
+
+        return HttpResponse(json.dumps(response_data), content_type='application/json')
+
+
+class StudentExtraListView(LoginRequiredForAjaxMixin, View):
+    def post(self, request, *args, **kwargs):
+        form = StudentExtraForm(request.POST)
+
+        result = False
+        data = dict()
+
+        if form.is_valid():
+            courses = request.user.courses.filter(year=form.cleaned_data['year'],
+                                                  semester=form.cleaned_data['semester'])
+            extras = Extra.objects.filter(course__in=courses, week=form.cleaned_data['week'])
+
+            result = True
+            data = json.loads(serializers.serialize(
+                'json',
+                extras,
+                relations=('course_times', 'course')
+            ))
+
+        response_data = dict(
+            result=result,
+            data=data,
+            type=u'success',
+            message=u''
         )
 
         return HttpResponse(json.dumps(response_data), content_type='application/json')
