@@ -395,7 +395,7 @@ function time_table(){
                 /* Act on the event */
                 $(this).find("span").css("color","#333333");
             });
-            $(element).click(reload_extre_info);
+            $(element).click(reload_extra_info);
         });
     }
     initialize();
