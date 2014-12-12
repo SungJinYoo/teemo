@@ -53,7 +53,10 @@ function add_extra_info(extra_data_list, attendance_info_no){
 		$(".attendance_info[data-no={0}]".format(attendance_info_no)).remove();	
 	}
 }
-function reload_extre_info(extra_data_list){
+function remove_extra_info(){
+	
+}
+function reload_extra_info(extra_data_list){
 	// remove Current extra_info;
 	$(".extra_info").each(function(index, element){
 		$(this).remove();
