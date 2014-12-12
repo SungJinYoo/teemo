@@ -7,7 +7,7 @@ from django.views.generic.base import View
 from django.views.generic.edit import DeleteView
 from core.constants import WEEK_DAY_TRANS_KOR, SEMESTER_TRANS
 from core.views import LoginRequiredForAjaxMixin
-from time_table.forms import TimeTableForm, AttendanceForm, ExtraForm, FetchExtraForm
+from time_table.forms import TimeTableForm, AttendanceForm, ExtraForm, FetchExtraForm, StudentTimeTableForm
 from time_table.models import Course, CourseTime, Extra, User
 
 
@@ -23,7 +23,9 @@ class TimeTableView(LoginRequiredForAjaxMixin, View):
         form = TimeTableForm(request.POST)
         if form.is_valid():
             try:
-                course = Course.objects.filter(course_no=form.cleaned_data['course_no']).get()
+                course = Course.objects.filter(year=form.cleaned_data['year'],
+                                               semester=form.cleaned_data['semester'],
+                                               course_no=form.cleaned_data['course_no']).get()
                 data = json.loads(serializers.serialize(
                     'json',
                     Course.objects.filter(students__in=User.objects.filter(courses=course)),
@@ -41,6 +43,31 @@ class TimeTableView(LoginRequiredForAjaxMixin, View):
             data=data,
             type=type,
             message=message
+        )
+
+        return HttpResponse(json.dumps(response_data), content_type='application/json')
+
+
+class StudentTimeTableView(LoginRequiredForAjaxMixin, View):
+    def post(self, request, *args, **kwargs):
+        form = StudentTimeTableForm(request.POST)
+
+        result = False
+        data = dict()
+
+        if form.is_valid():
+            data = json.loads(serializers.serialize(
+                'json',
+                request.user.courses.filter(year=form.cleaned_data['year'],
+                                            semester=form.cleaned_data['semeter']),
+                relations=('course_times',)
+            ))
+
+            result = True
+
+        response_data = dict(
+            result=result,
+            data=data,
         )
 
         return HttpResponse(json.dumps(response_data), content_type='application/json')

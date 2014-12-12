@@ -11,6 +11,12 @@ class TimeTableForm(forms.Form):
     week = forms.IntegerField()
 
 
+class StudentTimeTableForm(forms.Form):
+    year = forms.IntegerField()
+    semester = forms.IntegerField()
+    week = forms.IntegerField()
+
+
 class AttendanceForm(forms.Form):
     year = forms.IntegerField()
     semester = forms.IntegerField()
