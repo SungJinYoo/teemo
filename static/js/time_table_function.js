@@ -37,10 +37,14 @@ function inner_add_extra_info(extra_data_list){
         extra_info.hover(function() {
             /* Stuff to do when the mouse enters the element */
             $(this).removeClass('opaque');
+            $(this).addClass('top_layer');
+
             $(this).children().show();
         }, function() {
             /* Stuff to do when the mouse leaves the element */
-            $(this).addClass('opaque'); 
+            $(this).addClass('opaque');
+            $(this).removeClass('top_layer');
+            
             $(this).children().hide();
         });
 		$("#extra_info_wrapper").append(extra_info);
@@ -54,7 +58,7 @@ function add_extra_info(extra_data_list, attendance_info_no){
 	}
 }
 function remove_extra_info(){
-	
+
 }
 function reload_extra_info(extra_data_list){
 	// remove Current extra_info;

@@ -39,6 +39,10 @@
 .opaque{
     opacity: 0.3;
 }
+.top_layer{
+    z-index : 999;
+}
+
 .menu_button{
     font-size: 14pt;
 }
