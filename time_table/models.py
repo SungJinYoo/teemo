@@ -308,10 +308,14 @@ class ExtraManager(models.Manager):
 class Extra(models.Model):
     ADDITIONAL = 0
     EXAM = 1
+    ASSIGNMENT = 2
+    CANCEL = 3
 
     EXTRA_CATEGORY_CHOICES = (
         (ADDITIONAL, u'보강'),
         (EXAM, u'시험'),
+        (ASSIGNMENT, u'과제'),
+        (CANCEL, u'휴강')
     )
 
     course = models.ForeignKey(Course, related_name='extras')

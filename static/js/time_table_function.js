@@ -19,26 +19,84 @@ function inner_add_extra_info(extra_data_list){
 			}
 			height += block.outerHeight();
 		}
-		var extra_info = $("<div>").attr("data-pk", extra_data.fields.pk).addClass("extra_info attached_box opaque {0}".format(COLOR_SELECT[extra_data.fields.category])).css({
+		var extra_info = $("<div>").attr("data-pk", extra_data.pk).attr("data-category",extra_data.fields.category).addClass("extra_info attached_box opaque {0}".format(COLOR_SELECT[extra_data.fields.category])).css({
 			top: top,
 			left: left,
 			width: width,
 			height: height,
 		});
+		
+		var ul_element = $("<ul>").attr("id","info_ul");
+		ul_element.addClass("clear");
+		var li_course_name = $("<li>").text(extra_data.fields.course.fields.name);
+		var li_memo = $("<li>").addClass("extra_memo").text(extra_data.fields.memo);
+
 		var edit_button = $("<button>").addClass("glyphicon glyphicon-pencil menu_button edit_button").click(function(){
-			// TODO : 
+			var extra_info = $(this).parent().parent();
+			console.log(extra_info);
+			var modal = $("#modify_modal");
+			var pk = extra_info.attr("data-pk");
+			var form = modal.find("#modify_extra_form");
+			var li_memo = extra_info.find(".extra_memo");
+			form.find("input[name=extra_pk]").val(pk);
+
+			var category = extra_info.attr("data-category");
+			// form.find("input[name=category]");
+			form.find("input[value={0}]:radio".format(category)).attr("checked", true);
+			form.find("textarea").text(li_memo.text());
+			modal.modal();
+
+			modal.find("#modify_extra_button").off("click");
+            modal.find("#modify_extra_button").click(function(){
+                if(!form.find("input[name=category]:checked").val()){
+                    toast_message("warning", "일정 유형을 선택해주세요");
+                    return false;
+                }
+                $.post(
+                    form.attr("action"),
+                    form.serialize()
+                )
+                    .done(function(json){
+                        toast_message(json.type, json.message);
+                        if(json.result){
+                            // add_extra_info(ajax.data.extra_data, ajax.data.attendance_info_no);
+                            extra_info.removeClass(COLOR_SELECT[category]);
+                            extra_info.addClass(COLOR_SELECT[form.find("input:checked").val()]);
+                            console.log(form.find("textarea").val());
+                            li_memo.text(form.find("textarea").val());
+                        }
+                    })
+                    .always(function(){
+                        modal.modal("hide");
+                    });
+            });
 		}).hide();
 		var remove_button = $("<button>").addClass("glyphicon glyphicon-remove menu_button remove_button").click(function(){
 			//TODO: remove DB
+			var extra_info = $(this).parent().parent();
+			var pk = extra_info.attr("data-pk");
+			var form = $("#delete_extra_form");
+			var confirm_value = confirm("일정을 취소하시겠습니까?");
+			if(confirm_value){
+				form.find("input[name=extra_pk]").val(pk);
+				$.post(
+					form.attr("action"),
+					form.serialize()
+				)
+					.done(function(json){
+						toast_message(json.type, json.message);
+						if(json.result){
+							extra_info.remove();
+						}
+					});
+			}
+
 		}).hide();
+
 		var menu_button_wrapper = $("<div>").addClass("menu_button_wrapper");
 		menu_button_wrapper.append([edit_button, remove_button]);
 		extra_info.append(menu_button_wrapper);
 
-		var ul_element = $("<ul>").attr("id","info_ul");
-		ul_element.addClass("clear");
-		var li_course_name = $("<li>").text(extra_data.fields.course.fields.name);
-		var li_memo = $("<li>").text(extra_data.fields.memo);
 
 		ul_element.append(li_course_name);
 		ul_element.append(li_memo);

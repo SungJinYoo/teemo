@@ -149,6 +149,7 @@ function time_table(){
                 form.find(".start_time").val(TIME_TABLE_PERIODS[$(blocks[0]).attr("data-row")][0]);
                 form.find(".end_time").val(TIME_TABLE_PERIODS[$(blocks[blocks.length - 1]).attr("data-row")][1]);
                 form.find(".attendance_info_no").val(attendance_info.attr("data-no"));
+                form.find("textarea").val("");
 
                 modal.find("#add_extra_button").off("click");
                 modal.find("#add_extra_button").click(function(){
@@ -169,7 +170,7 @@ function time_table(){
                         .always(function(){
                             modal.modal("hide");
                         });
-                modal.modal("hide");
+                // modal.modal("hide");
                 // TODO: add_extra_info();
                 });
             }));

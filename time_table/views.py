@@ -6,12 +6,12 @@ from django.http.response import HttpResponse
 from django.views.generic.base import View
 from django.views.generic.edit import DeleteView
 from core.constants import WEEK_DAY_TRANS_KOR, SEMESTER_TRANS
-from core.views import LoginRequiredMixin
+from core.views import LoginRequiredForAjaxMixin
 from time_table.forms import TimeTableForm, AttendanceForm, ExtraForm, FetchExtraForm
 from time_table.models import Course, CourseTime, Extra, User
 
 
-class TimeTableView(LoginRequiredMixin, View):
+class TimeTableView(LoginRequiredForAjaxMixin, View):
     def post(self, request, *args, **kwargs):
         # TODO: make grade option in place
 
@@ -46,7 +46,7 @@ class TimeTableView(LoginRequiredMixin, View):
         return HttpResponse(json.dumps(response_data), content_type='application/json')
 
 
-class AttendanceView(LoginRequiredMixin, View):
+class AttendanceView(LoginRequiredForAjaxMixin, View):
     def post(self, request, *args, **kwargs):
         form = AttendanceForm(request.POST)
 
@@ -87,7 +87,7 @@ class AttendanceView(LoginRequiredMixin, View):
         return HttpResponse(json.dumps(response_data), content_type='application/json')
 
 
-class ExtraView(View):
+class ExtraView(LoginRequiredForAjaxMixin, View):
     def post(self, request, *args, **kwargs):
         form = ExtraForm(request.POST)
 
@@ -121,11 +121,65 @@ class ExtraView(View):
         return HttpResponse(json.dumps(response_data), content_type='application/json')
 
 
-class ExtraDeleteView(DeleteView):
-    template_name = 'object_delete_modal.html'
+class ModifyExtraView(LoginRequiredForAjaxMixin, View):
+    def post(self, request, *args, **kwargs):
+        result = False,
+        type = u'error',
+        message = u'교수의 권한이 필요합니다'
+
+        if request.user.is_professor():
+            extra = Extra.objects.get(pk=request.POST['extra_pk'])
+
+            if extra.course in request.user.teaching_courses.all():
+                extra.category = request.POST['category']
+                extra.memo = request.POST['memo']
+                extra.save()
+
+                result = True
+                type = u'success'
+                message = u'일정이 수정되었습니다'
+
+            else:
+                message = u'담당 교과목이 아닙니다'
+
+        response_data = dict(
+            result=result,
+            type=type,
+            message=message
+        )
+
+        return HttpResponse(json.dumps(response_data), content_type='application/json')
 
 
-class ExtraListView(View):
+class DeleteExtraView(LoginRequiredForAjaxMixin, View):
+    def post(self, request, *args, **kwargs):
+        result = False,
+        type = u'error',
+        message = u'교수의 권한이 필요합니다'
+
+        if request.user.is_professor():
+            extra = Extra.objects.get(pk=request.POST['extra_pk'])
+
+            if extra.course in request.user.teaching_courses.all():
+                extra.delete()
+
+                result = True
+                type = u'success'
+                message = u'일정이 취소되었습니다'
+
+            else:
+                message = u'담당 교과목이 아닙니다'
+                
+        response_data = dict(
+            result=result,
+            type=type,
+            message=message
+        )
+
+        return HttpResponse(json.dumps(response_data), content_type='application/json')
+
+
+class ExtraListView(LoginRequiredForAjaxMixin, View):
     def post(self, request, *args, **kwargs):
         form = FetchExtraForm(request.POST)
 
