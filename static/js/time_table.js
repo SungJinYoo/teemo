@@ -5,11 +5,10 @@
 "use strict";
 $(document).ready(function(){
     time_table();
-
-    $student_form = $("student_form");
+    var student_form = $("#student_form");
     $.post(
-            form.attr("action"),
-            form.serialize()
+            student_form.attr("action"),
+            student_form.serialize()
         )
             .done(function(json){
                 // toast_message(ajax.type, ajax.message);
