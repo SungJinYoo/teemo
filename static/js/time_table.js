@@ -11,9 +11,9 @@ $(document).ready(function(){
             form.attr("action"),
             form.serialize()
         )
-            .done(function(ajax){
+            .done(function(json){
                 // toast_message(ajax.type, ajax.message);
-                if(ajax.result){
+                if(json.result){
                     var time_table_data = json.data;
                     for(var i = 0; i < time_table_data.length; i++){
                         var course_data = time_table_data[i];
