@@ -1,11 +1,158 @@
 # -*- coding: utf-8 -*-
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager, Group
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils.decorators import method_decorator
 from core.constants import WEEK_DAY_KEYS, TIME_TABLE_PERIODS, WEEK_DAY_TRANS_KOR_REVERSE
 from core.utils import fetch_student_time_table, get_current_year, get_current_semester, fetch_courses
 import re
+
+
+class UserManager(BaseUserManager):
+    def create_user(self, userid, password, **extra_fields):
+        user = self.model(userid=userid, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+
+        return user
+
+    def create_superuser(self, userid, password, **extra_fields):
+        user = self.create_user(userid, password, **extra_fields)
+        user.is_staff = True
+        user.is_active = True
+        user.is_superuser = True
+
+        user.save(using=self._db)
+
+        return user
+
+    def create_student(self, userid, password, **extra_fields):
+        user = self.create_user(userid, password, **extra_fields)
+        student_group = Group.objects.get(name="students")
+
+        user.groups.add(student_group)
+
+        return user
+
+    def create_inactive_student(self, userid, password, **extra_fields):
+        user = self.create_student(userid, password, **extra_fields)
+
+        user.is_active = False
+        user.save(using=self._db)
+
+        return user
+
+    def get_or_create_student(self, userid, password, **extra_fields):
+        try:
+            student = self.students(userid=userid, is_active=True).get()
+            student.set_password(password)
+            student.save()
+        except User.DoesNotExist:
+            student = self.create_student(userid, password, **extra_fields)
+
+        return student
+
+    def create_professor(self, userid, password, **extra_fields):
+        user = self.create_user(userid, password, **extra_fields)
+        professor_group = Group.objects.get(name="professors")
+
+        user.groups.add(professor_group)
+
+        return user
+
+    def create_inactive_professor(self, userid, password, **extra_fields):
+        user = self.create_professor(userid, password, **extra_fields)
+
+        user.is_active = False
+        user.save(using=self._db)
+
+        return user
+
+    def students(self, *args, **kwargs):
+        qs = self.get_queryset().filter(*args, **kwargs)
+        return qs.filter(groups=Group.objects.get(name="students"))
+
+    def professors(self, *args, **kwargs):
+        qs = self.get_queryset().filter(*args, **kwargs)
+        return qs.filter(groups=Group.objects.get(name="professors"))
+
+
+class User(AbstractBaseUser, PermissionsMixin):
+    class Meta:
+        verbose_name = u"사용자"
+        verbose_name_plural = u"사용자들"
+        swappable = "AUTH_USER_MODEL"
+
+    USERNAME_FIELD = "userid"
+
+    userid = models.CharField(verbose_name=u"아이디",
+                              max_length=60,
+                              help_text=u"아이디 혹은 학번",
+                              unique=True,
+                              db_index=True)
+
+    name = models.CharField(verbose_name=u"이름",
+                            max_length=64,
+                            null=True,
+                            blank=True)
+
+    email = models.EmailField(verbose_name=u"Email",
+                              max_length=255,
+                              unique=True,
+                              null=True)
+
+    is_staff = models.BooleanField(verbose_name="is staff",
+                                   default=False,
+                                   help_text="Is this user a staff?")
+    is_active = models.BooleanField(verbose_name="is active",
+                                    default=True,
+                                    help_text="Is this user active?")
+
+    objects = UserManager()
+
+    # only the user who is in the students group can call this method
+    @method_decorator(transaction.atomic)
+    def add_course(self):
+        student_group = Group.objects.get(name="students")
+        if student_group not in self.groups.all():
+            return
+
+        year = get_current_year()
+        semester = get_current_semester()
+        time_table_data = fetch_student_time_table(self.userid, year, semester)
+
+        for period_index, period_data in enumerate(time_table_data):
+            for day in WEEK_DAY_KEYS:
+                if period_data[day]:
+                    course_no, name, trash1, trash2, trash3 = period_data[day].split(',')
+                    course = Course.objects.filter(year=year, semester=semester, course_no=course_no).get()
+                    self.courses.add(course)
+
+    def is_student(self):
+        if self.groups.filter(name="students"):
+            return True
+        return False
+
+    def is_professor(self):
+        if self.groups.filter(name="professors"):
+            return True
+        return False
+
+    def __unicode__(self):
+        return u'{}({})'.format(self.userid, self.name)
+
+
+def add_student(student_id):
+    try:
+        student = User.objects.get(user_id=student_id)
+    except User.DoesNotExist:
+        student = User.objects.create_inactive_student(student_id, "00")
+
+    try:
+        student.add_course()
+        return True, u'success', u'학번 {} 추가되었습니다'.format(student.student_id)
+    except Exception as e:
+        return False, u'danger', u'학생 추가에 실패하였습니다'
 
 
 class Univ(models.Model):
@@ -88,6 +235,8 @@ class CourseTime(models.Model):
 
 class Course(models.Model):
     department = models.ForeignKey(Department, related_name='courses', null=True)
+    students = models.ManyToManyField(User, related_name='courses')
+    professor = models.ForeignKey(User, related_name='teaching_courses', null=True)
     course_times = models.ManyToManyField(CourseTime, related_name='courses')
 
     year = models.IntegerField(verbose_name=u'년도', null=False, blank=False)
@@ -125,9 +274,17 @@ class Course(models.Model):
                             end_time=end_time
                         ))
 
+            professor_name = course_info['daepyoGangsaNm']
+            professor_id = course_info['daepyoGangsaNo']
+            try:
+                professor = User.objects.filter(userid=professor_id).get()
+            except:
+                professor = User.objects.create_inactive_professor(professor_id, "0000", name=professor_name)
+
             course = Course.objects.create(year=year, semester=semester, grade=course_info['isuGrade'],
                                            name=course_info['gwamokNm'], name_en=course_info['gwamokEnm'],
                                            course_no=course_info['suupNo'], time_infos=time_info_list)
+            professor.teaching_courses.add(course)
 
             print '[{}/{}]'.format(index, total)
         print 'Done'
@@ -169,34 +326,4 @@ class Extra(models.Model):
     def __unicode__(self):
         return u'{} {} {}'.format(self.week, self.type, self.course.name)
 
-
-class Student(models.Model):
-    user = models.OneToOneField(User, null=True, blank=True)
-    student_id = models.SlugField(verbose_name=u'학번', null=False, blank=False)
-    courses = models.ManyToManyField(Course, related_name='students')
-
-    def add_course(self):
-        year = get_current_year()
-        semester = get_current_semester()
-        time_table_data = fetch_student_time_table(self.student_id, year, semester)
-
-        for period_index, period_data in enumerate(time_table_data):
-            for day in WEEK_DAY_KEYS:
-                if period_data[day]:
-                    course_no, name, trash1, trash2, trash3 = period_data[day].split(',')
-                    course = Course.objects.filter(year=year, semester=semester, course_no=course_no).get()
-                    self.courses.add(course)
-
-    def __unicode__(self):
-        return u'{}'.format(self.student_id)
-
-
-def add_student(student_id):
-    student, is_new = Student.objects.get_or_create(student_id=student_id)
-
-    try:
-        student.add_course()
-        return True, u'success', u'학번 {} 추가되었습니다'.format(student.student_id)
-    except Exception as e:
-        return False, u'danger', u'학생 추가에 실패하였습니다'
 

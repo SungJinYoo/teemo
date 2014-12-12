@@ -8,7 +8,7 @@ from django.views.generic.edit import DeleteView
 from core.constants import WEEK_DAY_TRANS_KOR, SEMESTER_TRANS
 from core.views import LoginRequiredMixin
 from time_table.forms import TimeTableForm, AttendanceForm, ExtraForm, FetchExtraForm
-from time_table.models import Course, Student, CourseTime, Extra
+from time_table.models import Course, CourseTime, Extra, User
 
 
 class TimeTableView(LoginRequiredMixin, View):
@@ -26,7 +26,7 @@ class TimeTableView(LoginRequiredMixin, View):
                 course = Course.objects.filter(course_no=form.cleaned_data['course_no']).get()
                 data = json.loads(serializers.serialize(
                     'json',
-                    Course.objects.filter(students__in=Student.objects.filter(courses=course)),
+                    Course.objects.filter(students__in=User.objects.filter(courses=course)),
                     relations=('course_times',)
                 ))
                 result = True
@@ -59,7 +59,7 @@ class AttendanceView(LoginRequiredMixin, View):
             block_data = json.loads(form.cleaned_data['block_data'])
 
             course = Course.objects.filter(year=form.cleaned_data['year'], semester=form.cleaned_data['semester'], course_no=form.cleaned_data['course_no']).get()
-            students = Student.objects.filter(courses=course)  # all the students that attends this course
+            students = User.objects.filter(courses=course)  # all the students that attends this course
             course_times = CourseTime.objects.filter(day=block_data['day'], period_index__in=block_data['period_index_list'])
             students_that_expected_to_dismiss = students.filter(courses__in=Course.objects.filter(course_times__in=course_times))
 

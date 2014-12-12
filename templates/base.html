@@ -32,7 +32,9 @@
 			<ul class="nav navbar-nav">
 				<li><a href="{% url 'help' %}">사용 방법</a></li>
 				<li><a href="{% url 'index' %}">그시간 내꺼!</a></li>
+				{% if user.is_authenticated and user.is_professor %}
 				<li><a href="{% url 'add_student' %}">학생 추가</a></li>
+				{% endif %}
 			</ul>
 			<form id="course_no_form" class="navbar-form navbar-left" role="search">
 				<div class="form-group">
