@@ -64,6 +64,10 @@
     padding: 0;
     background-color: inherit;
 }
+#extra_area{
+    width: 100%;
+    resize: none;
+}
 
 #empty{
     display: none;

@@ -41,7 +41,7 @@
 		<input class="week" type="hidden" name="week" />
 	</form>
 	<!-- Modal -->
-	<div class="modal fade" id="add_extra_confirm_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal fade" id="main_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -66,8 +66,8 @@
 							<label><input type="radio" name="category" value="1"/>시험</label>
 						</div>
 						<div>
-							<h5>특이사항</h5>
-							<textarea name="memo" rows="4" cols="90"></textarea>
+							<h5>추가 공지</h5>
+							<textarea id="extra_area" name="memo" rows="6"></textarea>
 						</div>
 					</form>
 				</div>
