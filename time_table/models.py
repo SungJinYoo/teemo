@@ -144,7 +144,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 def add_student(student_id):
     try:
-        student = User.objects.get(user_id=student_id)
+        student = User.objects.get(userid=student_id)
     except User.DoesNotExist:
         student = User.objects.create_inactive_student(student_id, "00")
 
