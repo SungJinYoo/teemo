@@ -3,9 +3,39 @@
  */
 
 "use strict";
-
 $(document).ready(function(){
     time_table();
+
+    $student_form = $("student_form");
+    $.post(
+            form.attr("action"),
+            form.serialize()
+        )
+            .done(function(ajax){
+                // toast_message(ajax.type, ajax.message);
+                if(ajax.result){
+                    var time_table_data = json.data;
+                    for(var i = 0; i < time_table_data.length; i++){
+                        var course_data = time_table_data[i];
+                        var course_no = course_data.fields.course_no;
+                        var course_name = course_data.fields.name;
+                        var course_time_data = course_data.fields.course_times;
+                        var color_code = get_random_color_code();
+
+                        for(var j = 0; j < course_time_data.length; j++){
+                            var course_time = course_time_data[j];
+                            var block = $("#{0}_{1}".format(course_time.fields.day, course_time.fields.period_index));
+                            var upper_block = $("#{0}_{1}".format(course_time.fields.day, parseInt(course_time.fields.period_index) - 1));
+                            var current_color = $("#empty").css("background-color", color_code).css("background-color");
+                            var upper_block_background_color = upper_block.css("background-color");
+                            if(j == 0 || upper_block_background_color == "rgba(0, 0, 0, 0)" || current_color != upper_block_background_color){
+                                block.text("{0}, {1}".format(course_no, course_name));
+                            }
+                            block.css("background-color", color_code);
+                        }
+                    }
+                }
+            })
 });
 
 function time_table(){

@@ -45,6 +45,13 @@
 		{% csrf_token %}
 		<input type="hidden" name="extra_pk" />
 	</form>
+
+	<form id="student_form" method="post" action="{% url 'time_table:student' %}">
+		{% csrf_token %}
+		<input class="year" type="hidden" name="yeay">
+		<input class="semester" type="hidden" name="semester">
+		<input class="week" type="hidden" name="week">
+	</form>
 	
 	<!-- Modal -->
 	<div class="modal fade" id="main_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
