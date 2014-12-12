@@ -34,18 +34,27 @@ function inner_add_extra_info(extra_data_list){
 			// $(this).parent().remove();
 			//TODO: remove DB
 		}).hide());
+
+		var ul_element = $("<ul>");
+		var li_course_name = $("<li>").text(extra_data.fields.course.fields.name);
+		var li_memo = $("<li>").text(extra_data.fields.memo);
+
+		ul_element.append(li_course_name);
+		ul_element.append(li_memo);
+		extra_info.append(ul_element);
+
         extra_info.hover(function() {
             /* Stuff to do when the mouse enters the element */
             $(this).removeClass('opaque');
             $(this).addClass('top_layer');
 
-            $(this).children().show();
+            $(this).find("button").show();
         }, function() {
             /* Stuff to do when the mouse leaves the element */
             $(this).addClass('opaque');
             $(this).removeClass('top_layer');
             
-            $(this).children().hide();
+            $(this).find("button").hide();
         });
 		$("#extra_info_wrapper").append(extra_info);
 	}
