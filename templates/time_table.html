@@ -4,105 +4,192 @@
 {% load ds_utils %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/time_table.css' %}"/>
+	<link rel="stylesheet" href="{% static 'css/time_table.css' %}"/>
 {% endblock %}
 
 {% block script %}
-    <script type="text/javascript" src="{% static 'js/time_table.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/time_table_function.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/time_table.js' %}"></script>
 {% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="container">
-            <div class="col-md-3">
-                <form id="fetch_time_table_form" role="form" method="post" action="{% url 'time_table:fetch' %}">
-                    {% csrf_token %}
-                    <fieldset>
-                        <legend>시간표 옵션 선택</legend>
-                        <div class="form-group">
-                            <p><strong><span id="year"></span><span>년</span></strong></p>
-                            <input id="year_input" type="hidden" name="year" />
-                        </div>
-                        <div class="form-group">
-                            <select id="semester" name="semester">
-                                {% for semester in SEMESTER %}
-                                    <option value="{{ semester }}">{{ SEMESTER_VERBOSE|nth:forloop.counter0 }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <input type="number" id="week_input" name="week" placeholder="주차" />
-                            <label for="week_input">주차</label>
-                        </div>
-                        <input type="hidden" id="grade_input" name="grade" />
-                    </fieldset>
-                    <fieldset>
-                        <legend>학년 선택</legend>
-                        {% for grade in GRADE_VERBOSE %}
-                            <input type="checkbox" id="{{ grade }}" class="grade_checkbox" value="{{ forloop.counter }}" />
-                            <label for="{{ grade }}">{{ GRADE_VERBOSE_KOR|nth:forloop.counter0 }}</label>
-                        {% endfor %}
-                        <input type="checkbox" id="all" value="all" />
-                        <label for="all">전체</label>
-                    </fieldset>
-                </form>
-                <form id="fetch_attendance_data_form" role="form" method="post" action="{% url 'time_table:attendance' %}">
-                    {% csrf_token %}
-                    <input id="year_input" type="hidden" name="year" />
-                    <input id="semester_input" type="hidden" name="semester" />
-                    <input id="week_input" type="hidden" name="week" />
-                    <input id="block_no" type="hidden" name="block_no" />
-                    <input id="blocks" type="hidden" name="blocks" />
-                </form>
-            <fieldset>
-                <legend>편의기능</legend>
-                <button id="reset_button" class="btn btn-default">블럭 초기화</button>
-            </fieldset>
-            </div>
-            <div class="col-md-9">
-                <table id="time_table" class="table table-bordered table-condensed">
-                    <caption>시간표</caption>
-                    <colgroup>
-                        <col span="1" class="period_header">
-                        <col span="7" class="time_table_cell">
-                    </colgroup>
-                    <tr>
-                        <th></th> {# for left-top empty th #}
-                        {% for day in WEEK_DAYS_KOR %}
-                            <th>{{ day }}</th>
-                        {% endfor %}
-                    </tr>
-                    {% for period in TIME_TABLE_PERIODS %}
-                        {% with forloop.counter0 as row %}
-                            {% with forloop.counter0 as period_number %}
-                                <tr>
-                                    <th>{{ period }}</th>
-                                    {% for day in WEEK_DAY_KEYS %}
-                                        {% with forloop.counter0 as col %}
-                                            <td id="{{ day }}_{{ period_number }}" data-row="{{ row }}" data-col="{{ col }}"></td>
-                                        {% endwith %}
-                                    {% endfor %}
-                                </tr>
-                            {% endwith %}
-                        {% endwith %}
-                    {% endfor %}
-                </table>
-            </div>
-        </div>
-    </div>
-    {#<!-- On rows -->#}
-    {#<tr class="active">...</tr>#}
-    {#<tr class="success">...</tr>#}
-    {#<tr class="warning">...</tr>#}
-    {#<tr class="danger">...</tr>#}
-    {#<tr class="info">...</tr>#}
-    {##}
-    {#<!-- On cells (`td` or `th`) -->#}
-    {#<tr>#}
-    {#    <td class="active">...</td>#}
-    {#    <td class="success">...</td>#}
-    {#    <td class="warning">...</td>#}
-    {#    <td class="danger">...</td>#}
-    {#    <td class="info">...</td>#}
-    {#</tr>#}
+	<form id="fetch_time_table_form" role="form" method="post" action="{% url 'time_table:fetch' %}">
+		{% csrf_token %}
+		<fieldset>
+			<div class="form-group">
+				<input class="year" type="hidden" name="year" />
+				<input class="semester" type="hidden" name="semester" />
+				<input class="week" type="hidden" name="week"/>
+				<input class="course_no" type="hidden" name="course_no" />
+			</div>
+		</fieldset>
+	</form>
+	<form id="fetch_attendance_data_form" role="form" method="post" action="{% url 'time_table:attendance' %}">
+		{% csrf_token %}
+		<input class="year" type="hidden" name="year" />
+		<input class="semester" type="hidden" name="semester" />
+		<input class="week" type="hidden" name="week" />
+		<input id="block_no" type="hidden" name="block_no" />
+		<input id="block_data" type="hidden" name="block_data" />
+		<input class="course_no" type="hidden" name="course_no" />
+	</form>
+	<form id="fetch_extras_form" role="form" method="post" action="{% url 'time_table:extras' %}">
+		{% csrf_token %}
+		<input class="year" type="hidden" name="year" />
+		<input class="semester" type="hidden" name="semester" />
+		<input class="course_no" type="hidden" name="course_no" />
+		<input class="week" type="hidden" name="week" />
+	</form>
+
+	<form id="delete_extra_form" method="post" action="{% url 'time_table:delete_extra' %}" >
+		{% csrf_token %}
+		<input type="hidden" name="extra_pk" />
+	</form>
+
+	<form id="student_form" method="post" action="{% url 'time_table:student' %}">
+		{% csrf_token %}
+		<input class="year" type="hidden" name="year">
+		<input class="semester" type="hidden" name="semester">
+		<input class="week" type="hidden" name="week">
+	</form>
+
+	<form id="student_extras_form" method="post" action="{% url 'time_table:student_extras' %}">
+		{% csrf_token %}
+		<input class="year" type="hidden" name="year">
+		<input class="semester" type="hidden" name="semester">
+		<input class="week" type="hidden" name="week">
+	</form>
+	
+	<!-- Modal -->
+	<div class="modal fade" id="main_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4 class="modal-title">일정 추가</h4>
+				</div>
+				<div class="modal-body">
+					<form id="add_extra_form" method="post" action="{% url 'time_table:extra' %}">
+						{% csrf_token %}
+						<input class="year" type="hidden" name="year" />
+						<input class="semester" type="hidden" name="semester" />
+						<input class="course_no" type="hidden" name="course_no" />
+						<input class="week" type="hidden" name="week" />
+						<input class="day" type="hidden" name="day" />
+						<input class="start_time" type="hidden" name="start_time" />
+						<input class="end_time" type="hidden" name="end_time" />
+						<input class="attendance_info_no" type="hidden" name="attendance_info_no" />
+						<!-- TODO: change here to use django choice info in model -->
+						<div>
+							<h5>일정 유형</h5>
+
+							<label><input type="radio" name="category" value="0"/>보강</label>
+							<label><input type="radio" name="category" value="1"/>시험</label>
+							<label><input type="radio" name="category" value="2"/>과제</label>
+							<label><input type="radio" name="category" value="3"/>휴강</label>
+
+						</div>
+						<div>
+							<h5>추가 공지</h5>
+							<textarea class="extra_area" name="memo" rows="6"></textarea>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">취소</button>
+					<button id="add_extra_button" type="button" class="btn btn-primary">추가</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="modify_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4 class="modal-title">일정 추가</h4>
+				</div>
+				<div class="modal-body">
+					<form id="modify_extra_form" method="post" action="{% url 'time_table:modify_extra' %}" >
+						{% csrf_token %}
+						<input type="hidden" name="extra_pk"/>
+						<!-- TODO: change here to use django choice info in model -->
+						<div>
+							<h5>일정 유형</h5>
+							<label><input type="radio" name="category" value="0"/>보강</label>
+							<label><input type="radio" name="category" value="1"/>시험</label>
+							<label><input type="radio" name="category" value="2"/>과제</label>
+							<label><input type="radio" name="category" value="3"/>휴강</label>
+
+						</div>
+						<div>
+							<h5>추가 공지</h5>
+							<textarea class="extra_area" name="memo" rows="6"></textarea>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">취소</button>
+					<button id="modify_extra_button" type="button" class="btn btn-primary">수정</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<div class="row" id="main_box">
+		<div class="container">
+			<div class="col-md-1">
+			{% if user.is_authenticated and user.is_professor %}
+				<div class="arrows" id="prev_week">
+			{% else %}
+				<div class="arrows student-arrow" id="prev_week">
+			{% endif %}
+					<p><span class="glyphicon glyphicon-chevron-left"></span></p>
+				</div>
+			</div>
+			<div class="col-md-10" id="time_table_wrapper">
+				<table id="time_table" class="table table-bordered table-condensed">
+					<caption><p><span id="year"></span><span>년</span> <span id="semester"></span><span>학기</span> <span id = "week"></span><span>주차</span></p></caption>
+					<colgroup>
+						<col span="1" class="period_header">
+						<col span="7" class="time_table_cell">
+					</colgroup>
+					<tr>
+						<th></th> {# for left-top empty th #}
+						{% for day in WEEK_DAYS_KOR %}
+							<th>{{ day }}</th>
+						{% endfor %}
+					</tr>
+					{% for period in TIME_TABLE_PERIODS %}
+						{% with forloop.counter0 as row %}
+							{% with forloop.counter0 as period_number %}
+								<tr>
+									<th>{{ period }}</th>
+									{% for day in WEEK_DAY_KEYS %}
+										{% with forloop.counter0 as col %}
+											<td id="{{ day }}_{{ period_number }}" data-day="{{ day }}" data-row="{{ row }}" data-col="{{ col }}"></td>
+										{% endwith %}
+									{% endfor %}
+								</tr>
+							{% endwith %}
+						{% endwith %}
+					{% endfor %}
+				</table>
+				<div id="attendance_info_wrapper"></div>
+				<div id="extra_info_wrapper"></div>
+			</div>
+			<div class="col-md-1">
+			{% if user.is_authenticated and user.is_professor %}
+				<div class="arrows" id="next_week">
+			{% else %}
+				<div class="arrows student-arrow" id="next_week">
+			{% endif %}
+					<p><span class="glyphicon glyphicon-chevron-right"></span></p>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="empty"></div>
 {% endblock %}

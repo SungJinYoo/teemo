@@ -84,7 +84,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'teemo',
         'USER': 'root',
-        'PASSWORD': '$ecrecy1216',
+        'PASSWORD': '1234',
         'HOST': '/var/run/mysqld/mysqld.sock',
         'PORT': '3306',
     }
@@ -124,6 +124,8 @@ STATICFILES_DIRS = (
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR,  'templates'),
 )
+
+AUTH_USER_MODEL = 'time_table.User'
 
 # serializer settings
 SERIALIZATION_MODULES = {

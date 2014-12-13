@@ -3,6 +3,9 @@
  */
 
 function toast_message(type, message){
+    if(message == ""){
+        return;
+    }
     if(type == "success")
         toastr.success(message);
     else if(type == "warning")
