@@ -7,8 +7,8 @@ web project group calendar
 2. move to repo's root
 3. $./setup.sh
 4. $source `which virtualenvwrapper.sh`
-5. $workon teemo"
-6. $echo CREATE DATABASE teemo DEFAULT CHARACTER SET utf8 | mysql -u $your_username -p
+5. $workon teemo
+6. $echo CREATE DATABASE teemo DEFAULT CHARACTER SET utf8 | mysql -u (your_username) -p
 7. $./setup_db.sh
 8. $python manage.py runserver
 
