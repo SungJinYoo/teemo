@@ -8,7 +8,7 @@ web project group calendar
 3. run "setup.sh"
 4. run "source `which virtualenvwrapper.sh`"
 5. run "workon teemo"
-6. run "mysqladmin -u $username -p?(if u have password) create teemo --default-character-set='utf8'"
+6. run "echo "CREATE DATABASE teemo DEFAULT CHARACTER SET utf8" | mysql -u $your_username -p"
 7. run "setup_db.sh"
 8. run "python manage.py runserver"
 
