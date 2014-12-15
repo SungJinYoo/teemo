@@ -5,12 +5,12 @@ web project group calendar
 
 1. clone repo
 2. move to repo's root
-3. run "setup.sh"
-4. run "source `which virtualenvwrapper.sh`"
-5. run "workon teemo"
-6. run "echo "CREATE DATABASE teemo DEFAULT CHARACTER SET utf8" | mysql -u $your_username -p"
-7. run "setup_db.sh"
-8. run "python manage.py runserver"
+3. $./setup.sh
+4. $source `which virtualenvwrapper.sh`
+5. $workon teemo"
+6. $echo CREATE DATABASE teemo DEFAULT CHARACTER SET utf8 | mysql -u $your_username -p
+7. $./setup_db.sh
+8. $python manage.py runserver
 
 now you can see the teemo service in your browser at locahost:8000
 
