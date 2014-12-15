@@ -268,7 +268,9 @@ class StudentExtraListView(LoginRequiredForAjaxMixin, View):
             result=result,
             data=data,
             type=u'success',
-            message=u''
+            message=u'{}년 {}학기 {}주차 일정을 조회하였습니다'.format(form.cleaned_data['year'],
+                                                        SEMESTER_TRANS[form.cleaned_data['semester']],
+                                                        form.cleaned_data['week'])
         )
 
         return HttpResponse(json.dumps(response_data), content_type='application/json')
