@@ -3,47 +3,18 @@ teemo(group_calendar)
 
 web project group calendar
 
-Clone project;
+1. clone repo
+2. move to repo's root
+3. run "setup.sh"
+4. run "source `which virtualenvwrapper.sh`"
+5. run "workon teemo"
+6. run "mysqladmin -u $username -p?(if u have password) create teemo --default-character-set='utf8'"
+7. run "setup_db.sh"
+8. run "python manage.py runserver"
 
-IF use OS X
-	
-	sudo pip install virtualenv
-	sudo pip install virtualenvwrapper
+now you can see the teemo service in your browser at locahost:8000
 
-Check your virtualenvwapper.sh
-	
-	which virtualenvwrapper.sh
+you can login with ID: teemo PW: teemo as a professor teaching course no 22152
 
-Add this script on your SHELL( See which virtualenvwrapper.sh)
-	
-	source /usr/local/bin/vitrualenvwrapper.sh
+you can login with ID: 2008037280 PW: 2008037280 as a student attending course 22152
 
-Make virtualenv
-
-	mkvirtualenv teemo
-
-install mysql
-
-	sudo apt-get install mysqlclient-dev
-	
-	brew install mysql
-
-Additional package Install
-
-	pip install -r requirements.txt
-
-ADD mysql database,connect your mysql
-
-	create databases teemo default character set "UTF8";
-
-Run server
-
-	python manage.py runserver
-
-IF you have to get permission to manage database
-	
-	python mamage.py createsuperuser
-
-Add initial_data into your application
-	
-	python manage.py loaddata initial_data/course_times.json
