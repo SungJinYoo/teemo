@@ -20,16 +20,18 @@ pip install virtualenvwrapper
 source `which virtualenvwrapper.sh`
 halt_when_fail "importing virtualenvwrapper"
 
-rmvirtualenv teemo2 # ignore failure
+rmvirtualenv teemo # ignore failure
 
-mkvirtualenv -p `which python2.7` teemo2
+mkvirtualenv -p `which python2.7` teemo
 halt_when_fail "creating virtualenv"
 
 cd initial_data/wadofstuff-django-serializers-1.1.0
 python setup.py install
 cd ../../
+
 pip install -r initial_data/requirements.txt
 halt_when_fail "installing dependency"
 
+halt_when_not_exists "mysqladmin" `which mysqladmin`
 
 echo -e "\033[32m [SUCCESS] \033[0m Setup done! Follow the remaining steps."
